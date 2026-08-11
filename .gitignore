@@ -43,5 +43,7 @@ next-env.d.ts
 # local database
 /data
 
-public/uploads/*
-!public/uploads/.gitkeep
+# The couple's own photos (hero + gallery) are committed so they deploy as static
+# assets. Files added later through the admin uploader on Vercel go to Blob storage
+# instead and never land here.
+!public/uploads/

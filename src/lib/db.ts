@@ -3,6 +3,7 @@ import path from "path";
 import fs from "fs";
 import bcrypt from "bcryptjs";
 import { nanoid } from "nanoid";
+import { GALLERY_IMAGES } from "./gallery-manifest";
 
 const LOCAL_DB_PATH = path.join(process.cwd(), "data", "wedding.db");
 
@@ -16,11 +17,28 @@ declare global {
   var __weddingDbReady: Promise<void> | undefined;
 }
 
+/**
+ * Serverless hosts (Vercel, Lambda) give the function a read-only filesystem, so the
+ * local-file fallback cannot work there — it fails deep inside libSQL with a bare
+ * "ENOENT: mkdir '/var/task/data'". Detect it up front and say what to actually do.
+ */
+function isServerless(): boolean {
+  return Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+}
+
 function createConnection(): Client {
   const url = process.env.TURSO_DATABASE_URL;
   if (url) {
     // Production / any environment pointed at a real Turso database.
     return createClient({ url, authToken: process.env.TURSO_AUTH_TOKEN });
+  }
+  if (isServerless()) {
+    throw new Error(
+      "TURSO_DATABASE_URL is not set. This deployment has a read-only filesystem, so the " +
+        "local data/wedding.db fallback cannot be used. Create a database at https://turso.tech " +
+        "and set TURSO_DATABASE_URL and TURSO_AUTH_TOKEN in the project's environment variables, " +
+        "then redeploy. See the 'Deploying to Vercel' section of the README."
+    );
   }
   // Local development: libSQL's embedded file mode needs no cloud credentials
   // and behaves like plain SQLite on disk.
@@ -300,14 +318,10 @@ async function seed(db: Client) {
   const galleryCount = (await db.execute("SELECT COUNT(*) as c FROM gallery_images"))
     .rows[0].c as number;
   if (galleryCount === 0) {
-    // The couple's photos live in public/uploads/gallery (see README). Seed whatever
-    // is on disk so a fresh database matches the site; an empty folder simply seeds
-    // no images and the gallery section renders nothing.
-    const galleryDir = path.join(process.cwd(), "public", "uploads", "gallery");
-    const images = (fs.existsSync(galleryDir) ? fs.readdirSync(galleryDir) : [])
-      .filter((f) => /\.(webp|jpe?g|png)$/i.test(f))
-      .sort()
-      .map((f) => `/uploads/gallery/${f}`);
+    // The couple's photos live in public/uploads/gallery, listed in a generated
+    // manifest rather than scanned at runtime — a serverless function's filesystem
+    // does not reliably contain public/. Regenerate with `npm run gallery:manifest`.
+    const images = GALLERY_IMAGES;
     for (let i = 0; i < images.length; i++) {
       await db.execute({
         sql: `INSERT INTO gallery_images (id, url, title, section, sortOrder, createdAt) VALUES (?, ?, ?, ?, ?, ?)`,
