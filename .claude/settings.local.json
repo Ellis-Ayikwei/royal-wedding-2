@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node \"C:/Users/Ellis/AppData/Local/Temp/claude/c--Users-Ellis-Downloads-royal-wedding-royal-wedding/7fe161c6-2fca-43d0-872b-598840644516/scratchpad/check-db.mjs\")",
+      "Bash(node tmp-db-update.mjs)",
+      "Bash(npx tsc *)",
+      "Bash(npx eslint *)",
+      "PowerShell(Get-CimInstance Win32_Process -Filter \"Name = 'node.exe'\" | Select-Object ProcessId, CreationDate, @{n='Cmd';e={$_.CommandLine.Substring\\(0, [Math]::Min\\(160, $_.CommandLine.Length\\)\\)}} | Format-List)",
+      "PowerShell(Get-NetTCPConnection -State Listen -LocalPort 3000,3001 -ErrorAction SilentlyContinue)",
+      "Bash(curl -s -o \"C:/Users/Ellis/AppData/Local/Temp/claude/c--Users-Ellis-Downloads-royal-wedding-royal-wedding/7fe161c6-2fca-43d0-872b-598840644516/scratchpad/home.html\" -w \"status=%{http_code}\\\\n\" http://localhost:3000/)",
+      "Bash(node -e \"const s=require\\('sharp'\\); console.log\\('sharp ok', s.versions?.sharp||''\\)\")",
+      "Bash(node tmp-process-images.mjs)",
+      "Bash(node -e ' *)",
+      "Bash(node tmp-apply-images.mjs)",
+      "Bash(curl -s -o /dev/null -w \"home=%{http_code}\\\\n\" http://localhost:3000/)",
+      "Bash(curl -s -o /dev/null -w \"hero=%{http_code} %{size_download}b type=%{content_type}\\\\n\" http://localhost:3000/uploads/hero.webp)",
+      "Bash(curl -s -o /dev/null -w \"photo=%{http_code} %{size_download}b\\\\n\" \"http://localhost:3000/uploads/gallery/_MG_9204.webp\")",
+      "Bash(curl -s http://localhost:3000/)",
+      "Bash(node tmp-fix-names.mjs)",
+      "Bash(cd \"c:/Users/Ellis/Downloads/royal-wedding/royal-wedding\" && sleep 2; css=$\\(curl -s http://localhost:3000/ | grep -oE '/_next/static/[^\"]*\\\\.css' | head -1\\); curl -s \"http://localhost:3000$css\" > /tmp/app2.css; echo \"== emerald tokens in compiled CSS:\"; grep -oE '\\\\--color-emerald-[0-9]+: #[0-9a-f]+;' /tmp/app2.css | sort -u; echo; echo \"== emerald utilities used:\"; grep -oE '\\\\.\\(text|bg|border|via|from|to\\)-emerald-[0-9]+\\(\\\\\\\\\\\\/[0-9]+\\)?' /tmp/app2.css | sort -u; echo; echo \"== rule-emerald-gold present:\"; grep -c 'rule-emerald-gold' /tmp/app2.css)",
+      "Read(//tmp/**)",
+      "Bash(grep -oE '.{0,20}text-emerald-300.{0,60}' /tmp/app2.css)",
+      "Bash(grep -oE '.{0,20}border-emerald-400.{0,70}' /tmp/app2.css)"
+    ]
+  }
+}
