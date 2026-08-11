@@ -1,3 +1,19 @@
 {
-    "iis.configDir": ""
+    "iis.configDir": "",
+    // The editor's file watcher holding handles on .next is one cause of the
+    // "EPERM: operation not permitted, rename ...manifest.js.tmp" crashes that
+    // next dev hits on Windows. Exclude the build output from watching/searching.
+    "files.watcherExclude": {
+        "**/.next/**": true,
+        "**/node_modules/**": true,
+        "**/data/**": true
+    },
+    "search.exclude": {
+        "**/.next": true,
+        "**/node_modules": true,
+        "**/public/uploads": true
+    },
+    "files.exclude": {
+        "**/.next": true
+    }
 }
