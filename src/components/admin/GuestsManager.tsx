@@ -7,6 +7,13 @@ import { AdminButton, ConfirmDialog, EmptyState, Field, Input, Modal, Select, us
 
 type Filter = "all" | RsvpStatus;
 
+interface GuestFormValues {
+  name: string;
+  phone: string;
+  guestCount: number;
+  rsvpStatus?: RsvpStatus;
+}
+
 export function GuestsManager({ initialGuests }: { initialGuests: Guest[] }) {
   const { push } = useToast();
   const [guests, setGuests] = useState(initialGuests);
@@ -64,7 +71,7 @@ export function GuestsManager({ initialGuests }: { initialGuests: Guest[] }) {
     }
   }
 
-  async function saveGuest(form: { name: string; phone: string; guestCount: number }, existing: Guest | null) {
+  async function saveGuest(form: GuestFormValues, existing: Guest | null) {
     setBusy(true);
     try {
       const res = await fetch(existing ? `/api/admin/guests/${existing.id}` : "/api/admin/guests", {
@@ -226,17 +233,21 @@ export function GuestsManager({ initialGuests }: { initialGuests: Guest[] }) {
   );
 }
 
-function GuestForm({ guest, busy, onClose, onSave }: { guest: Guest | null; busy: boolean; onClose: () => void; onSave: (form: { name: string; phone: string; guestCount: number }) => void }) {
+function GuestForm({ guest, busy, onClose, onSave }: { guest: Guest | null; busy: boolean; onClose: () => void; onSave: (form: GuestFormValues) => void }) {
   const [name, setName] = useState(guest?.name ?? "");
   const [phone, setPhone] = useState(guest?.phone ?? "");
   const [guestCount, setGuestCount] = useState(guest?.guestCount ?? 1);
+  const [rsvpStatus, setRsvpStatus] = useState<RsvpStatus>(guest?.rsvpStatus ?? "pending");
   const [error, setError] = useState<string | null>(null);
 
   function submit() {
     if (name.trim().length < 2) return setError("Enter the guest's full name.");
     if (phone.trim().length < 5) return setError("Enter a valid phone number.");
     setError(null);
-    onSave({ name: name.trim(), phone: phone.trim(), guestCount });
+    const values: GuestFormValues = { name: name.trim(), phone: phone.trim(), guestCount };
+    // Status is only meaningful on an existing guest; new ones always start pending.
+    if (guest) values.rsvpStatus = rsvpStatus;
+    onSave(values);
   }
 
   return (
@@ -252,9 +263,23 @@ function GuestForm({ guest, busy, onClose, onSave }: { guest: Guest | null; busy
           <Input id="g-count" type="number" min={1} max={20} value={guestCount} onChange={(e) => setGuestCount(Number(e.target.value))} />
         </Field>
         {guest && (
-          <Field label="Invitation link">
-            <Input readOnly value={`/invite/${guest.invitationToken}`} className="text-ivory-100/50" />
-          </Field>
+          <>
+            <Field label="RSVP response" htmlFor="g-status">
+              <Select id="g-status" value={rsvpStatus} onChange={(e) => setRsvpStatus(e.target.value as RsvpStatus)}>
+                <option value="pending">Awaiting response</option>
+                <option value="accepted">Accepted — attending</option>
+                <option value="declined">Declined — not attending</option>
+              </Select>
+            </Field>
+            <p className="-mt-1 text-[11px] leading-relaxed text-ivory-100/45">
+              Set this yourself when someone replies by phone. Guests can only respond once
+              through their link — switching back to &ldquo;Awaiting response&rdquo; lets them
+              use it again.
+            </p>
+            <Field label="Invitation link">
+              <Input readOnly value={`/invite/${guest.invitationToken}`} className="text-ivory-100/50" />
+            </Field>
+          </>
         )}
         {error && <p className="text-xs text-rose-200">{error}</p>}
         <div className="flex justify-end gap-3 pt-2">

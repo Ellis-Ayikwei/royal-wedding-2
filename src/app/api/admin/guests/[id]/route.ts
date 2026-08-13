@@ -7,6 +7,7 @@ const updateSchema = z.object({
   name: z.string().min(2).max(120).optional(),
   phone: z.string().min(5).max(30).optional(),
   guestCount: z.number().int().min(1).max(20).optional(),
+  rsvpStatus: z.enum(["pending", "accepted", "declined"]).optional(),
 });
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {

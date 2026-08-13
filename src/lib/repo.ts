@@ -62,19 +62,24 @@ export async function createGuest(input: {
   return (await getGuestById(id)) as Guest;
 }
 
+// The admin can set rsvpStatus directly — responses often arrive by phone, and the
+// guest-facing RSVP is one-shot, so setting a guest back to 'pending' is also the way
+// to let them respond through their link again.
 export async function updateGuest(
   id: string,
-  input: Partial<Pick<Guest, "name" | "phone" | "guestCount">>
+  input: Partial<Pick<Guest, "name" | "phone" | "guestCount" | "rsvpStatus" | "message">>
 ): Promise<Guest | undefined> {
   const existing = await getGuestById(id);
   if (!existing) return undefined;
   const db = await getDb();
   await db.execute({
-    sql: `UPDATE guests SET name = ?, phone = ?, guestCount = ?, updatedAt = ? WHERE id = ?`,
+    sql: `UPDATE guests SET name = ?, phone = ?, guestCount = ?, rsvpStatus = ?, message = ?, updatedAt = ? WHERE id = ?`,
     args: [
       input.name ?? existing.name,
       input.phone ?? existing.phone,
       input.guestCount ?? existing.guestCount,
+      input.rsvpStatus ?? existing.rsvpStatus,
+      input.message ?? existing.message,
       now(),
       id,
     ],
