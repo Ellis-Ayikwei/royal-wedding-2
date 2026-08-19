@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Plus, Pencil, Trash2, ArrowUp, ArrowDown, Star } from "lucide-react";
 import type { WeddingEvent } from "@/lib/types";
 import { AdminButton, ConfirmDialog, EmptyState, Field, Input, Modal, Textarea, useToast } from "./AdminUI";
-import { ImageUploader } from "./ImageUploader";
+import { ImageField } from "./ImageField";
 
 export function EventsManager({ initialEvents }: { initialEvents: WeddingEvent[] }) {
   const { push } = useToast();
@@ -186,7 +186,7 @@ function EventForm({ event, onClose, onSave }: { event: WeddingEvent | null; onC
         <Field label="Location" htmlFor="e-loc">
           <Input id="e-loc" value={form.location} onChange={(e) => set("location", e.target.value)} placeholder="Pot of Gold — Grand Hall" />
         </Field>
-        <ImageUploader label="Event image" id="e-img" value={form.image} onChange={(url) => set("image", url)} />
+        <ImageField label="Event image" id="e-img" value={form.image} onChange={(url) => set("image", url)} />
         {error && <p className="text-xs text-rose-200">{error}</p>}
         <div className="flex justify-end gap-3 pt-2">
           <AdminButton variant="ghost" onClick={onClose}>Cancel</AdminButton>

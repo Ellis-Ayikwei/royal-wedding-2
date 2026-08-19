@@ -18,7 +18,6 @@ export function SiteFooter({ coupleNames, weddingDate, venueName }: { coupleName
           <a href="#story" className="hover:text-gold-300 transition-colors">Our Story</a>
           <a href="#events" className="hover:text-gold-300 transition-colors">Events</a>
           <a href="#menu" className="hover:text-gold-300 transition-colors">Menu</a>
-          <a href="#gallery" className="hover:text-gold-300 transition-colors">Gallery</a>
           <a href="#venue" className="hover:text-gold-300 transition-colors">Location</a>
         </nav>
 

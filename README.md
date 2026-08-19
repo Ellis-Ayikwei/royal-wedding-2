@@ -9,7 +9,6 @@ Navy, emerald and gold; British royal typography meets subtle African pattern wo
 - **TypeScript** (strict)
 - **Tailwind CSS v4** with a custom token system
 - **SQLite / Turso** via `@libsql/client` with a typed async repository layer (`src/lib/repo.ts`)
-- **Vercel Blob** for image uploads, with a local-disk fallback for development
 - **Framer Motion** for scroll reveals, drawer and modal transitions
 - **bcrypt** password hashing + server-side session cookies
 
@@ -23,22 +22,21 @@ Navy, emerald and gold; British royal typography meets subtle African pattern wo
 ## Deploying to Vercel
 
 Vercel's serverless functions have a **read-only filesystem** (writable `/tmp` only,
-wiped between invocations and not shared across instances). A database file and a
-local uploads folder can't survive that, so both are backed by services built for it:
+wiped between invocations and not shared across instances), so the local database file
+can't survive there:
 
 - **Database → [Turso](https://turso.tech).** libSQL is wire-compatible with SQLite,
   so the schema and every query in `src/lib/repo.ts` are unchanged — only the
   connection target moves from a local file to a remote database. Create a database,
   then set `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` in the Vercel project's
-  environment variables.
-- **Uploads → Vercel Blob.** Attach a Blob store to the project from the Storage tab;
-  Vercel injects `BLOB_READ_WRITE_TOKEN` automatically, and `/api/admin/upload`
-  detects it and switches from local disk to Blob with no other change needed.
+  environment variables. Without them the app fails fast with a message saying so,
+  rather than trying to write to a read-only disk.
+- **Images** are plain URLs. Photos that ship with the site live in `public/uploads/`
+  and are committed, so Vercel serves them as static assets — no storage service and
+  no `BLOB_READ_WRITE_TOKEN` needed. Anything else can be any public image URL.
 
-Neither variable is required locally — see `.env.example`. Without them, the app runs
-against a local libSQL file at `data/wedding.db` and writes uploads to
-`public/uploads/`, exactly as it did before this migration. Set them only in the
-Vercel project (or wherever the filesystem is ephemeral) and nothing else changes.
+Neither variable is required locally — see `.env.example`. Without them the app runs
+against a local libSQL file at `data/wedding.db`.
 
 ## Getting started
 
@@ -69,7 +67,7 @@ httpOnly cookies with a 12-hour expiry.
 ## Routes
 
 **Guest**
-- `/` — hero, countdown, story, event timeline, menu, gallery, venue, live stream
+- `/` — hero, countdown, story, event timeline, menu, venue, live stream
 - `/invite/[token]` — personalized invitation, addressed by name, with its own OG preview
 
 **Admin** (all protected by the `(protected)` route group layout)
@@ -77,25 +75,23 @@ httpOnly cookies with a 12-hour expiry.
 - `/admin/guests` — CRUD, search, filter by status, copy/regenerate invitation links
 - `/admin/events` — CRUD, reorder, mark the main ceremony
 - `/admin/menu` — dishes by course + visibility control (hidden / scheduled / visible)
-- `/admin/gallery` — add images by URL and assign them to a section
+- `/admin/gallery` — add images by URL (the first supplies the story portrait; the
+  public photo wall is currently hidden)
 - `/admin/streaming` — platform, URL, title, start time, enable toggle
 - `/admin/venue` — name, locations, address, coordinates, maps override
 
-## Image uploads
+## Images
 
-Every image field in the admin (gallery, events, venue) has two modes: paste a link,
-or upload a file straight from the device. Uploads go through `POST /api/admin/upload`
-(admin-authenticated, 8MB limit, JPG/PNG/WEBP/GIF/SVG only), which stores the file and
-returns a URL — that URL lands in the same `url` column a pasted link would use, so the
-rest of the app doesn't know or care which mode was used.
+Every image field in the admin (gallery, events, venue) takes a URL, with a live
+preview beside it. File uploading was removed on purpose: it needed Vercel Blob in
+production and a writable disk locally, which is a lot of moving parts for a fixed
+set of wedding photos.
 
-Where the file actually goes depends on environment, automatically:
-- **`BLOB_READ_WRITE_TOKEN` set** (Vercel with a Blob store attached) → uploads to
-  Vercel Blob, returns the Blob URL.
-- **Not set** (local development) → writes to `public/uploads/` on disk, exactly as
-  before.
-
-No code change is needed to move between the two — see "Deploying to Vercel" above.
+The couple's photos live in `public/uploads/` and are committed to the repo, so they
+deploy as ordinary static assets and are referenced by path — `/uploads/hero.webp`,
+`/uploads/gallery/DSC_4912.webp`. `npm run gallery:manifest` regenerates
+`src/lib/gallery-manifest.ts` (which the database seed reads) after adding or removing
+files there. Any other public image URL works too.
 
 ## Notable behaviour
 
@@ -107,15 +103,19 @@ No code change is needed to move between the two — see "Deploying to Vercel" a
   Nothing is hardcoded.
 - **Stream CTA** adapts its label and icon to the configured platform and only renders
   when the stream is enabled.
-- **RSVP** works both from a personal invitation link and cold from the site; a repeat
-  submission updates the response and reports `alreadyRegistered`.
+- **RSVP is invitation-only and one-shot.** It is reachable only from a valid
+  `/invite/[token]` link — the public site shows no RSVP button at all. The guest's name
+  and party size come from the guest record rather than the form, and a second
+  submission is refused with a 409. To let someone respond again, set their status back
+  to "Awaiting response" in `/admin/guests`.
 
 ## Fonts
 
-Fraunces (display) and Inter (body) load from Google Fonts via a stylesheet link rather
-than `next/font`. The build sandbox couldn't reach `fonts.googleapis.com`, and `next/font`
-fetches at build time. To self-host instead, download both families into `public/fonts`
-and switch to `next/font/local` in `src/app/layout.tsx`.
+Fraunces (display), Inter (body) and Great Vibes (the script on the invitation) load from
+Google Fonts via a stylesheet link rather than `next/font`. The build sandbox couldn't
+reach `fonts.googleapis.com`, and `next/font` fetches at build time. To self-host instead,
+download the families into `public/fonts` and switch to `next/font/local` in
+`src/app/layout.tsx`.
 
 ## Verification
 
@@ -129,6 +129,4 @@ Flows tested end-to-end against a running server: admin login (reject + accept),
 guest create/update/delete, token regeneration and old-link invalidation, invitation
 page rendering and OG tags, RSVP accept, duplicate RSVP, invalid token, input validation,
 event CRUD, menu release logic across all three modes, stream platform adaptation,
-Google Maps URL construction, and file upload (local-disk path — the Blob path can't be
-tested without a real Vercel Blob token, but it's a straightforward call to the
-documented `put()` API).
+and Google Maps URL construction.
