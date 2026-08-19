@@ -142,6 +142,17 @@ async function migrate(db: Client) {
       adminId TEXT NOT NULL,
       expiresAt TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS event_photos (
+      id TEXT PRIMARY KEY,
+      url TEXT NOT NULL,
+      uploaderName TEXT,
+      caption TEXT,
+      status TEXT NOT NULL DEFAULT 'visible',
+      createdAt TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_event_photos_status_created ON event_photos(status, createdAt);
   `);
 }
 

@@ -10,6 +10,8 @@ import type {
   Venue,
   SiteSettings,
   RsvpStatus,
+  EventPhoto,
+  PhotoStatus,
 } from "./types";
 
 function now() {
@@ -356,6 +358,54 @@ export async function updateVenue(input: Partial<Omit<Venue, "id">>): Promise<Ve
     ],
   });
   return getVenue();
+}
+
+// ---------- Guest photo wall ----------
+export async function listPublicPhotos(): Promise<EventPhoto[]> {
+  const db = await getDb();
+  const res = await db.execute({
+    sql: "SELECT * FROM event_photos WHERE status = 'visible' ORDER BY createdAt DESC",
+    args: [],
+  });
+  return res.rows as unknown as EventPhoto[];
+}
+
+export async function listAllPhotos(): Promise<EventPhoto[]> {
+  const db = await getDb();
+  const res = await db.execute("SELECT * FROM event_photos ORDER BY createdAt DESC");
+  return res.rows as unknown as EventPhoto[];
+}
+
+export async function getEventPhotoById(id: string): Promise<EventPhoto | undefined> {
+  const db = await getDb();
+  const res = await db.execute({ sql: "SELECT * FROM event_photos WHERE id = ?", args: [id] });
+  return res.rows[0] as unknown as EventPhoto | undefined;
+}
+
+export async function createEventPhoto(input: {
+  url: string;
+  uploaderName?: string | null;
+  caption?: string | null;
+}): Promise<EventPhoto> {
+  const db = await getDb();
+  const id = nanoid();
+  const ts = now();
+  await db.execute({
+    sql: `INSERT INTO event_photos (id, url, uploaderName, caption, status, createdAt) VALUES (?, ?, ?, ?, 'visible', ?)`,
+    args: [id, input.url, input.uploaderName || null, input.caption || null, ts],
+  });
+  return (await getEventPhotoById(id)) as EventPhoto;
+}
+
+export async function updatePhotoStatus(id: string, status: PhotoStatus): Promise<EventPhoto | undefined> {
+  const db = await getDb();
+  await db.execute({ sql: "UPDATE event_photos SET status = ? WHERE id = ?", args: [status, id] });
+  return getEventPhotoById(id);
+}
+
+export async function deleteEventPhoto(id: string): Promise<void> {
+  const db = await getDb();
+  await db.execute({ sql: "DELETE FROM event_photos WHERE id = ?", args: [id] });
 }
 
 export function buildMapsUrl(venue: Venue): string {

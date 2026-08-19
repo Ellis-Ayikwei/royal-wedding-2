@@ -9,7 +9,7 @@ Navy, emerald and gold; British royal typography meets subtle African pattern wo
 - **TypeScript** (strict)
 - **Tailwind CSS v4** with a custom token system
 - **SQLite / Turso** via `@libsql/client` with a typed async repository layer (`src/lib/repo.ts`)
-- **Vercel Blob** for image uploads, with a local-disk fallback for development
+- **Cloudflare R2** for image uploads (S3-compatible, presigned direct-to-bucket uploads), with a local-disk fallback for development
 - **Framer Motion** for scroll reveals, drawer and modal transitions
 - **bcrypt** password hashing + server-side session cookies
 

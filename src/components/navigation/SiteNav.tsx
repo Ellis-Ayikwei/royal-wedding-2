@@ -13,6 +13,7 @@ const LINKS = [
   { href: "#gallery", label: "Gallery" },
   { href: "#venue", label: "Location" },
   { href: "#live", label: "Live" },
+  { href: "/photos", label: "Photo Wall" },
 ];
 
 export function SiteNav({ coupleNames }: { coupleNames: string }) {

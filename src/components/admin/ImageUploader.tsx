@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { Link2, Upload, Loader2, ImageOff } from "lucide-react";
 import { Field, Input, useToast } from "./AdminUI";
+import { uploadDirect } from "@/lib/directUpload";
 
 export function ImageUploader({
   label,
@@ -22,7 +23,7 @@ export function ImageUploader({
   const inputRef = useRef<HTMLInputElement>(null);
 
   async function handleFile(file: File) {
-    if (!file.type.startsWith("image/")) {
+    if (!file.type.startsWith("image/") && !/\.hei[cf]$/i.test(file.name)) {
       push("Please choose an image file.", "error");
       return;
     }
@@ -32,6 +33,15 @@ export function ImageUploader({
     }
     setUploading(true);
     try {
+      const result = await uploadDirect(file, "/api/admin/upload-url");
+      if (result.mode === "direct") {
+        setBroken(false);
+        onChange(result.publicUrl);
+        push("Image uploaded");
+        return;
+      }
+
+      // No R2 configured (local development): send the file straight to our server.
       const form = new FormData();
       form.append("file", file);
       const res = await fetch("/api/admin/upload", { method: "POST", body: form });
@@ -43,8 +53,8 @@ export function ImageUploader({
       setBroken(false);
       onChange(data.url);
       push("Image uploaded");
-    } catch {
-      push("Could not reach the server. Please try again.", "error");
+    } catch (err) {
+      push(err instanceof Error ? err.message : "Could not reach the server. Please try again.", "error");
     } finally {
       setUploading(false);
     }
@@ -88,7 +98,7 @@ export function ImageUploader({
           <input
             ref={inputRef}
             type="file"
-            accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+            accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml,.heic,.heif"
             className="hidden"
             onChange={(e) => {
               const file = e.target.files?.[0];
@@ -108,7 +118,7 @@ export function ImageUploader({
               </>
             ) : (
               <>
-                <Upload size={15} /> Choose an image (JPG, PNG, WEBP, GIF, SVG · up to 8MB)
+                <Upload size={15} /> Choose an image (JPG, PNG, WEBP, GIF, SVG, HEIC · up to 8MB)
               </>
             )}
           </button>

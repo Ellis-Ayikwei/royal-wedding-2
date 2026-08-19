@@ -62,6 +62,41 @@ export async function getSessionAdmin(token: string | undefined): Promise<AdminU
   return (adminRes.rows[0] as unknown as AdminUser | undefined) ?? null;
 }
 
+export async function verifyAdminPasswordById(id: string, password: string): Promise<boolean> {
+  const db = await getDb();
+  const res = await db.execute({ sql: "SELECT passwordHash FROM admin_users WHERE id = ?", args: [id] });
+  const row = res.rows[0] as unknown as { passwordHash: string } | undefined;
+  if (!row) return false;
+  return bcrypt.compareSync(password, row.passwordHash);
+}
+
+export async function isEmailTakenByOther(email: string, excludingId: string): Promise<boolean> {
+  const db = await getDb();
+  const res = await db.execute({
+    sql: "SELECT id FROM admin_users WHERE email = ? AND id != ?",
+    args: [email, excludingId],
+  });
+  return res.rows.length > 0;
+}
+
+export async function updateAdminAccount(
+  id: string,
+  input: { email?: string; password?: string }
+): Promise<AdminUser> {
+  const db = await getDb();
+  if (input.email) {
+    await db.execute({ sql: "UPDATE admin_users SET email = ? WHERE id = ?", args: [input.email, id] });
+  }
+  if (input.password) {
+    await db.execute({
+      sql: "UPDATE admin_users SET passwordHash = ? WHERE id = ?",
+      args: [bcrypt.hashSync(input.password, 10), id],
+    });
+  }
+  const res = await db.execute({ sql: "SELECT id, email FROM admin_users WHERE id = ?", args: [id] });
+  return res.rows[0] as unknown as AdminUser;
+}
+
 export async function getCurrentAdmin(): Promise<AdminUser | null> {
   const store = await cookies();
   const token = store.get(SESSION_COOKIE)?.value;
