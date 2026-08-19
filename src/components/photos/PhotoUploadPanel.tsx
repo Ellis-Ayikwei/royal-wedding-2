@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Camera, Check, Image as ImageIcon, Loader2, Plus, Sparkles, Video, X } from "lucide-react";
+import { Camera, Check, Image as ImageIcon, Loader2, Plus, Video, X } from "lucide-react";
 import type { EventPhoto } from "@/lib/types";
 import { uploadDirect } from "@/lib/directUpload";
 
