@@ -27,12 +27,20 @@ const ALLOWED_TYPES: Record<string, string> = {
   "image/svg+xml": "svg",
   "image/heic": "heic",
   "image/heif": "heif",
+  "video/mp4": "mp4",
+  "video/webm": "webm",
+  "video/quicktime": "mov",
+  "video/mpeg": "mpeg",
+  "video/x-m4v": "m4v",
+  "video/3gpp": "3gp",
+  "video/hevc": "hevc",
+  "video/x-msvideo": "avi",
 };
 
 export function extensionForContentType(contentType: string): string {
   const ext = ALLOWED_TYPES[contentType];
   if (!ext) {
-    throw new UploadError("Unsupported file type. Use JPG, PNG, WEBP, GIF, SVG, HEIC, or HEIF.");
+    throw new UploadError("Unsupported file type. Use JPG, PNG, WEBP, GIF, SVG, HEIC, HEIF, MP4, WEBM, or MOV.");
   }
   return ext;
 }

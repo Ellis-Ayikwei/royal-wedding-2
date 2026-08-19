@@ -384,6 +384,7 @@ export async function getEventPhotoById(id: string): Promise<EventPhoto | undefi
 
 export async function createEventPhoto(input: {
   url: string;
+  mediaType?: "image" | "video";
   uploaderName?: string | null;
   caption?: string | null;
 }): Promise<EventPhoto> {
@@ -391,8 +392,8 @@ export async function createEventPhoto(input: {
   const id = nanoid();
   const ts = now();
   await db.execute({
-    sql: `INSERT INTO event_photos (id, url, uploaderName, caption, status, createdAt) VALUES (?, ?, ?, ?, 'visible', ?)`,
-    args: [id, input.url, input.uploaderName || null, input.caption || null, ts],
+    sql: `INSERT INTO event_photos (id, url, mediaType, uploaderName, caption, status, createdAt) VALUES (?, ?, ?, ?, ?, 'visible', ?)`,
+    args: [id, input.url, input.mediaType || "image", input.uploaderName || null, input.caption || null, ts],
   });
   return (await getEventPhotoById(id)) as EventPhoto;
 }

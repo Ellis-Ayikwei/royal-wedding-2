@@ -11,6 +11,34 @@ export interface AdminUser {
   email: string;
 }
 
+export async function listAdminUsers(): Promise<AdminUser[]> {
+  const db = await getDb();
+  const res = await db.execute("SELECT id, email FROM admin_users ORDER BY email ASC");
+  return res.rows as unknown as AdminUser[];
+}
+
+export async function createAdminUser(email: string, password: string): Promise<AdminUser> {
+  const db = await getDb();
+  const admin = { id: nanoid(), email };
+  await db.execute({
+    sql: "INSERT INTO admin_users (id, email, passwordHash) VALUES (?, ?, ?)",
+    args: [admin.id, admin.email, bcrypt.hashSync(password, 10)],
+  });
+  return admin;
+}
+
+export async function deleteAdminUser(id: string): Promise<void> {
+  const db = await getDb();
+  await db.execute({ sql: "DELETE FROM admin_sessions WHERE adminId = ?", args: [id] });
+  await db.execute({ sql: "DELETE FROM admin_users WHERE id = ?", args: [id] });
+}
+
+export async function countAdminUsers(): Promise<number> {
+  const db = await getDb();
+  const res = await db.execute("SELECT COUNT(*) as count FROM admin_users");
+  return Number(res.rows[0]?.count ?? 0);
+}
+
 export async function verifyAdminCredentials(
   email: string,
   password: string

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
-import { X, ChevronLeft, ChevronRight, ImageOff } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, ImageOff, Play } from "lucide-react";
 import type { EventPhoto } from "@/lib/types";
 
 function relativeTime(iso: string): string {
@@ -43,7 +43,7 @@ export function PhotoWall({ photos }: { photos: EventPhoto[] }) {
 
   return (
     <>
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+      <div className="space-y-8">
         <AnimatePresence initial={false}>
           {photos.map((photo, i) => (
             <motion.button
@@ -62,14 +62,21 @@ export function PhotoWall({ photos }: { photos: EventPhoto[] }) {
                   <p className="text-[11px] text-ivory-100/40">{relativeTime(photo.createdAt)}</p>
                 </div>
               </div>
-              <div className="relative aspect-square w-full bg-navy-950">
-                <Image
-                  src={photo.url}
-                  alt={photo.caption || "Guest photo"}
-                  fill
-                  sizes="(min-width: 1280px) 33vw, (min-width: 640px) 50vw, 100vw"
-                  className="object-cover"
-                />
+              <div className="relative aspect-[4/5] w-full bg-navy-950">
+                {photo.mediaType === "video" ? (
+                  <div className="relative h-full w-full">
+                    <video src={photo.url} muted playsInline preload="metadata" className="h-full w-full object-cover" />
+                    <span className="absolute inset-0 flex items-center justify-center"><span className="flex h-11 w-11 items-center justify-center rounded-full bg-navy-950/70 text-gold-200"><Play size={17} fill="currentColor" /></span></span>
+                  </div>
+                ) : (
+                  <Image
+                    src={photo.url}
+                    alt={photo.caption || "Guest photo"}
+                    fill
+                    sizes="(min-width: 1280px) 33vw, (min-width: 640px) 50vw, 100vw"
+                    className="object-cover"
+                  />
+                )}
               </div>
               {photo.caption && (
                 <p className="px-3.5 py-3 text-sm text-ivory-100/75 leading-relaxed">{photo.caption}</p>
@@ -114,13 +121,17 @@ export function PhotoWall({ photos }: { photos: EventPhoto[] }) {
               className="max-h-[85vh] max-w-2xl w-full"
             >
               <div className="relative w-full max-h-[70vh] aspect-square rounded-lg overflow-hidden border border-gold-400/20">
-                <Image
-                  src={photos[activeIndex].url}
-                  alt={photos[activeIndex].caption || "Guest photo"}
-                  fill
-                  sizes="90vw"
-                  className="object-contain bg-navy-950"
-                />
+                {photos[activeIndex].mediaType === "video" ? (
+                  <video src={photos[activeIndex].url} controls autoPlay playsInline className="h-full w-full object-contain bg-navy-950" />
+                ) : (
+                  <Image
+                    src={photos[activeIndex].url}
+                    alt={photos[activeIndex].caption || "Guest photo"}
+                    fill
+                    sizes="90vw"
+                    className="object-contain bg-navy-950"
+                  />
+                )}
               </div>
               <div className="flex items-center gap-2.5 mt-4">
                 <Avatar name={photos[activeIndex].uploaderName} />

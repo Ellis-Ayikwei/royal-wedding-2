@@ -34,7 +34,8 @@ export async function uploadDirect(
   onStage?: (stage: UploadStage) => void,
   onProgress?: (percent: number) => void
 ): Promise<DirectUploadResult> {
-  const guessedContentType = looksLikeHeicByName(file) ? "image/jpeg" : file.type || "image/jpeg";
+  const isVideo = file.type.startsWith("video/") || /\.(mov|mp4|m4v|hevc|3gp|avi)$/i.test(file.name);
+  const guessedContentType = looksLikeHeicByName(file) ? "image/jpeg" : file.type || (isVideo ? "video/mp4" : "image/jpeg");
 
   const tokenRes = await fetch(urlEndpoint, {
     method: "POST",
@@ -45,7 +46,7 @@ export async function uploadDirect(
   const tokenData = await tokenRes.json();
   if (!tokenRes.ok) throw new Error(tokenData.error || "Could not start the upload.");
 
-  const { file: prepared } = await prepareUpload(file, onStage);
+  const { file: prepared } = isVideo ? { file } : await prepareUpload(file, onStage);
 
   onStage?.("uploading");
   await xhrPut(tokenData.uploadUrl, prepared, onProgress);

@@ -5,8 +5,18 @@ import { getClientIp } from "@/lib/http";
 import { isRateLimited } from "@/lib/rateLimit";
 import { confirmUploadWithinLimit, isR2Configured, saveLocalUpload, UploadError, UPLOAD_LIMITS } from "@/lib/storage";
 
+function contentTypeForFile(file: File): string {
+  if (file.type) return file.type;
+  if (/\.mov$/i.test(file.name)) return "video/quicktime";
+  if (/\.(mp4|m4v)$/i.test(file.name)) return "video/mp4";
+  if (/\.webm$/i.test(file.name)) return "video/webm";
+  if (/\.(hevc)$/i.test(file.name)) return "video/hevc";
+  return "application/octet-stream";
+}
+
 const completeSchema = z.object({
   url: z.string().url(),
+  mediaType: z.enum(["image", "video"]).default("image"),
   uploaderName: z.string().trim().max(80).optional().nullable(),
   caption: z.string().trim().max(280).optional().nullable(),
 });
@@ -46,9 +56,11 @@ export async function POST(req: NextRequest) {
 
     try {
       const buffer = Buffer.from(await file.arrayBuffer());
-      const url = await saveLocalUpload("event-photos", file.type, buffer);
+      const contentType = contentTypeForFile(file);
+      const url = await saveLocalUpload("event-photos", contentType, buffer);
       const photo = await createEventPhoto({
         url,
+        mediaType: contentType.startsWith("video/") ? "video" : "image",
         uploaderName: (form.get("uploaderName") as string) || null,
         caption: (form.get("caption") as string) || null,
       });
@@ -78,6 +90,7 @@ export async function POST(req: NextRequest) {
 
   const photo = await createEventPhoto({
     url: parsed.data.url,
+    mediaType: parsed.data.mediaType,
     uploaderName: parsed.data.uploaderName || null,
     caption: parsed.data.caption || null,
   });

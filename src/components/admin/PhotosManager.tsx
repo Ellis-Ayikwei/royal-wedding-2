@@ -101,11 +101,15 @@ export function PhotosManager({
           {filtered.map((photo) => (
             <div key={photo.id} className="group relative rounded-sm overflow-hidden border border-gold-400/20">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={photo.url}
-                alt={photo.caption || ""}
-                className={`w-full h-40 object-cover ${photo.status === "hidden" ? "opacity-40" : ""}`}
-              />
+              {photo.mediaType === "video" ? (
+                <video src={photo.url} muted playsInline preload="metadata" className={`w-full h-40 object-cover ${photo.status === "hidden" ? "opacity-40" : ""}`} />
+              ) : (
+                <img
+                  src={photo.url}
+                  alt={photo.caption || ""}
+                  className={`w-full h-40 object-cover ${photo.status === "hidden" ? "opacity-40" : ""}`}
+                />
+              )}
               <div className="absolute inset-x-0 top-0 px-3 py-2 flex items-center justify-between bg-gradient-to-b from-navy-950/80 to-transparent">
                 <span
                   className={`text-[10px] tracking-[0.12em] uppercase px-2 py-0.5 rounded-full border ${

@@ -31,7 +31,7 @@ export function PhotosExperience({ initialPhotos }: { initialPhotos: EventPhoto[
   }, []);
 
   return (
-    <div className="space-y-10">
+    <div className="mx-auto max-w-2xl space-y-10">
       <PhotoUploadPanel onUploaded={(photo) => setPhotos((current) => [photo, ...current])} />
       <div>
         <div className="flex items-center gap-2 mb-5">
