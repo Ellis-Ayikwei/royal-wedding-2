@@ -43,8 +43,19 @@ export async function uploadDirect(
     body: JSON.stringify({ contentType: guessedContentType }),
   });
   if (tokenRes.status === 501) return { mode: "fallback" };
+  const responseType = tokenRes.headers.get("content-type") || "";
+  if (!responseType.includes("application/json")) {
+    const finalUrl = tokenRes.url || urlEndpoint;
+    throw new Error(
+      `Upload endpoint returned ${tokenRes.status} from ${finalUrl}. Expected JSON from ${urlEndpoint}. ` +
+        "Redeploy the latest application build and verify this URL is not redirected to an invitation page."
+    );
+  }
   const tokenData = await tokenRes.json();
   if (!tokenRes.ok) throw new Error(tokenData.error || "Could not start the upload.");
+  if (typeof tokenData.uploadUrl !== "string" || typeof tokenData.publicUrl !== "string") {
+    throw new Error("Upload endpoint returned an incomplete upload response.");
+  }
 
   const { file: prepared } = isVideo ? { file } : await prepareUpload(file, onStage);
 
