@@ -9,7 +9,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: `${names} | The Royal Wedding`,
     description:
       settings.heroTagline ||
-      "Join us in celebration — a royal wedding uniting two houses, two continents, and one love.",
+      "Join us in celebration: a royal wedding uniting two houses, two continents, and one love.",
     openGraph: {
       title: `${names} | The Royal Wedding`,
       description: settings.heroTagline || "Join us in celebration.",

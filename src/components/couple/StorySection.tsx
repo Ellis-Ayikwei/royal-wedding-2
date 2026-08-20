@@ -6,7 +6,7 @@ import { Eyebrow } from "../ui/primitives";
 const MILESTONES = [
   { year: "2023", label: "A First Meeting in Accra" },
   { year: "2024", label: "Building a Life Together" },
-  { year: "2025", label: "A Proposal in East Legon" },
+  { year: "2025", label: "A Proposal" },
   { year: "2026", label: "The Wedding" },
 ];
 

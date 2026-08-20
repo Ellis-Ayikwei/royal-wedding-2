@@ -93,7 +93,7 @@ export function StreamingManager({ initialSettings }: { initialSettings: StreamS
         </Field>
 
         <Field label="Stream title" htmlFor="s-title">
-          <Input id="s-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="The Royal Ceremony — Live" />
+          <Input id="s-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="The Wedding Ceremony, Live" />
         </Field>
 
         <Field label="Starts at" htmlFor="s-start">

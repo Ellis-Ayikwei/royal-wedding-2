@@ -75,7 +75,7 @@ export function EventsTimeline({ events }: { events: WeddingEvent[] }) {
                         <Clock size={13} />
                         {formatDate(event.eventDate)}
                         {event.startTime ? ` · ${event.startTime}` : ""}
-                        {event.endTime ? `–${event.endTime}` : ""}
+                        {event.endTime ? `-${event.endTime}` : ""}
                       </span>
                       {event.location && (
                         <span className="flex items-center gap-1.5">

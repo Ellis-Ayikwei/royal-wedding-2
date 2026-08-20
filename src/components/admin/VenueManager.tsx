@@ -76,7 +76,7 @@ export function VenueManager({ initialVenue }: { initialVenue: Venue }) {
           </Field>
         </div>
         <Field label="Custom Google Maps link" htmlFor="v-maps">
-          <Input id="v-maps" value={form.mapsUrl} onChange={(e) => set("mapsUrl", e.target.value)} placeholder="Optional — overrides coordinates" />
+          <Input id="v-maps" value={form.mapsUrl} onChange={(e) => set("mapsUrl", e.target.value)} placeholder="Optional, overrides coordinates" />
         </Field>
         <ImageUploader label="Venue image" id="v-img" value={form.image} onChange={(url) => set("image", url)} />
 

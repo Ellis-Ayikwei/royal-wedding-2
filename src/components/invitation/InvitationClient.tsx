@@ -6,7 +6,7 @@ import { RsvpProvider, useRsvp } from "../rsvp/RsvpProvider";
 import { PrimaryButton } from "../ui/primitives";
 import type { Guest } from "@/lib/types";
 
-/* Decorative gold lantern hanging from a chain — echoes the printed invitation. */
+/* Decorative gold lantern hanging from a chain, echoing the printed invitation. */
 function Lantern({ className = "", drop = 0 }: { className?: string; drop?: number }) {
   return (
     <svg

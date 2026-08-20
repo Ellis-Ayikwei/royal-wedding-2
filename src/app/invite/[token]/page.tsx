@@ -13,7 +13,7 @@ function formatTime(t: string) {
   return m ? `${hour}.${String(m).padStart(2, "0")}${suffix}` : `${hour}${suffix}`;
 }
 
-/** "11AM TO 11PM" — the span of the day, taken from the scheduled events. */
+/** "11AM TO 11PM": the span of the day, taken from the scheduled events. */
 function dayWindow(times: { startTime: string | null; endTime: string | null }[]) {
   const starts = times.map((e) => e.startTime).filter((t): t is string => !!t).sort();
   const ends = times.map((e) => e.endTime).filter((t): t is string => !!t).sort();

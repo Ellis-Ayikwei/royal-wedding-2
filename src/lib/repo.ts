@@ -64,7 +64,7 @@ export async function createGuest(input: {
   return (await getGuestById(id)) as Guest;
 }
 
-// The admin can set rsvpStatus directly — responses often arrive by phone, and the
+// The admin can set rsvpStatus directly. Responses often arrive by phone, and the
 // guest-facing RSVP is one-shot, so setting a guest back to 'pending' is also the way
 // to let them respond through their link again.
 export async function updateGuest(
@@ -105,7 +105,7 @@ export async function deleteGuest(id: string): Promise<void> {
 }
 
 // guestCount is set by the admin when the guest is invited and is deliberately not
-// writable here — the guest confirms the party they were invited for, they don't choose it.
+// writable here. The guest confirms the party they were invited for, they don't choose it.
 export async function submitRsvp(
   token: string,
   input: {

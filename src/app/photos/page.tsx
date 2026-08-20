@@ -47,7 +47,7 @@ const MAX_FILE_SIZE = 200 * 1024 * 1024;
 
 /**
  * The guest photo wall is hidden for now: the route 404s and the nav link is removed.
- * Everything below still works — flip this to true (and restore the "Photo Wall" entry
+ * Everything below still works. Flip this to true (and restore the "Photo Wall" entry
  * in SiteNav's LINKS) to open it to guests. /admin/photos is unaffected.
  */
 const PHOTO_WALL_ENABLED = false;

@@ -2,7 +2,7 @@ import { guestStats, listEvents, getMenuSettings, getStreamSettings } from "@/li
 import { DashboardView } from "@/components/admin/DashboardView";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Dashboard — Estate Office" };
+export const metadata = { title: "Dashboard | Estate Office" };
 
 export default async function DashboardPage() {
   const [stats, events, menuSettings, streamSettings] = await Promise.all([

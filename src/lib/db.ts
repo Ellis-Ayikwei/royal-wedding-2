@@ -19,7 +19,7 @@ declare global {
 
 /**
  * Serverless hosts (Vercel, Lambda) give the function a read-only filesystem, so the
- * local-file fallback cannot work there — it fails deep inside libSQL with a bare
+ * local-file fallback cannot work there. It fails deep inside libSQL with a bare
  * "ENOENT: mkdir '/var/task/data'". Detect it up front and say what to actually do.
  */
 function isServerless(): boolean {
@@ -207,7 +207,7 @@ async function seed(db: Client) {
     .rows[0].c as number;
   if (streamCount === 0) {
     await db.execute({
-      sql: "INSERT INTO stream_settings (id, platform, url, title, enabled, startAt) VALUES (1, 'youtube', '', 'The Royal Ceremony — Live', 0, ?)",
+      sql: "INSERT INTO stream_settings (id, platform, url, title, enabled, startAt) VALUES (1, 'youtube', '', 'The Wedding Ceremony, Live', 0, ?)",
       args: [new Date(Date.now() + 1000 * 60 * 60 * 24 * 40).toISOString()],
     });
   }
@@ -220,8 +220,8 @@ async function seed(db: Client) {
             VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?)`,
       args: [
         "Pot of Gold Residence",
-        "Pot of Gold Residence — Traditional Ceremony",
-        "Pot of Gold Residence — White Wedding Ceremony",
+        "Traditional Ceremony, Pot of Gold Residence",
+        "White Wedding Ceremony, Pot of Gold Residence",
         "Near Boundary Rd, East Legon, Accra",
         null,
         null,
@@ -238,7 +238,7 @@ async function seed(db: Client) {
       {
         title: "Ga Traditional Ceremony",
         description:
-          "The joining of two families in the Ga tradition. For many of our guests this may be a first Ga ceremony — every part of it carries meaning, reflecting respect, love, family and our Ghanaian heritage.\n\nOrder of service — Arrival and welcome of the groom's family · Opening prayer · Introduction of the families · The knocking · Presentation of gifts · Presentation of the bride · Presentation of the groom · Exchange of rings · Presentation of the Bible · Advice and blessings · Closing prayer · Drinks and small chops",
+          "The joining of two families in the Ga tradition. For many of our guests this may be a first Ga ceremony. Every part of it carries meaning, reflecting respect, love, family and our Ghanaian heritage.\n\nOrder of service: Arrival of the groom's family, formally welcomed by the bride's family · Opening prayer · Introduction of the families · The knocking, where the groom's spokesperson asks the bride's family for permission · Presentation of gifts · Presentation of the bride, who is asked whether she accepts · Presentation of the groom · Exchange of rings · Presentation of the Bible · Advice and blessings from parents and elders · Closing prayer · Drinks and small chops",
         eventDate: "2026-09-20",
         startTime: "11:00",
         endTime: "13:30",
@@ -249,7 +249,7 @@ async function seed(db: Client) {
       {
         title: "White Wedding Ceremony",
         description:
-          "The exchange of vows before family and friends.\n\nOrder of service — Processional · Welcome and opening prayer · A moment of remembrance for those we hold dear · Scripture readings (Ephesians 5:21–31 and 1 Corinthians 13:4–8) · Short sermon · Worship songs · Personal vows · Traditional vows · Exchange of rings · Prayer and blessing for the couple · Pronouncement of marriage and the kiss · Recessional",
+          "The exchange of vows before family and friends.\n\nOrder of service: Guests seated · Processional, with the groom and groomsmen, the bridesmaids, and the bride escorted by her father · Welcome and opening prayer · A moment of remembrance for those we hold dear · Scripture readings, Ephesians 5:21-31 and 1 Corinthians 13:4-8 · Short sermon · Two worship songs · Personal vows · Traditional wedding vows · Exchange of rings · Prayer and blessing for the couple · Pronouncement of marriage, the kiss, and the introduction of the newlyweds · Recessional · Guests move inside while the room is set for dinner",
         eventDate: "2026-09-20",
         startTime: "15:00",
         endTime: "16:30",
@@ -260,7 +260,7 @@ async function seed(db: Client) {
       {
         title: "Wedding Reception",
         description:
-          "Dinner, dancing and celebration into the night.\n\nOrder of events — Grand entrance · Welcome from the MC · First dance, \"Always and Forever\" · Bride and father dance, \"My Girl\" · Grace · Dinner · Speeches · Cake cutting · Toast to the newlyweds · Bouquet toss · Evening games, The Newlywed Quiz and Guess the Hand · Open dance floor · Farewell",
+          "Dinner, dancing and celebration into the night.\n\nOrder of events: Grand entrance of the newly married couple · Welcome from the MC · First dance, Always and Forever by Heatwave · Bride and father dance, My Girl by The Temptations · Grace · Dinner is served · Speeches from the father and mother of the bride · Cake cutting · Toast to the newlyweds · Bouquet toss · Evening games, The Newlywed Quiz and Guess the Hand · Open dance floor · Farewell",
         eventDate: "2026-09-20",
         startTime: "17:00",
         endTime: "23:00",
@@ -319,7 +319,7 @@ async function seed(db: Client) {
     .rows[0].c as number;
   if (galleryCount === 0) {
     // The couple's photos live in public/uploads/gallery, listed in a generated
-    // manifest rather than scanned at runtime — a serverless function's filesystem
+    // manifest rather than scanned at runtime. A serverless function's filesystem
     // does not reliably contain public/. Regenerate with `npm run gallery:manifest`.
     const images = GALLERY_IMAGES;
     for (let i = 0; i < images.length; i++) {

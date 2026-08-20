@@ -267,13 +267,13 @@ function GuestForm({ guest, busy, onClose, onSave }: { guest: Guest | null; busy
             <Field label="RSVP response" htmlFor="g-status">
               <Select id="g-status" value={rsvpStatus} onChange={(e) => setRsvpStatus(e.target.value as RsvpStatus)}>
                 <option value="pending">Awaiting response</option>
-                <option value="accepted">Accepted — attending</option>
-                <option value="declined">Declined — not attending</option>
+                <option value="accepted">Accepted (attending)</option>
+                <option value="declined">Declined (not attending)</option>
               </Select>
             </Field>
             <p className="-mt-1 text-[11px] leading-relaxed text-ivory-100/45">
               Set this yourself when someone replies by phone. Guests can only respond once
-              through their link — switching back to &ldquo;Awaiting response&rdquo; lets them
+              through their link. Switching back to &ldquo;Awaiting response&rdquo; lets them
               use it again.
             </p>
             <Field label="Invitation link">

@@ -184,7 +184,7 @@ function EventForm({ event, onClose, onSave }: { event: WeddingEvent | null; onC
           </Field>
         </div>
         <Field label="Location" htmlFor="e-loc">
-          <Input id="e-loc" value={form.location} onChange={(e) => set("location", e.target.value)} placeholder="Pot of Gold — Grand Hall" />
+          <Input id="e-loc" value={form.location} onChange={(e) => set("location", e.target.value)} placeholder="Pot of Gold Residence" />
         </Field>
         <ImageUploader label="Event image" id="e-img" value={form.image} onChange={(url) => set("image", url)} />
         {error && <p className="text-xs text-rose-200">{error}</p>}

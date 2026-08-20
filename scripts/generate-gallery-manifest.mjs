@@ -25,7 +25,7 @@ const ordered = [
   ...files.filter((f) => f !== FIRST),
 ];
 
-const body = `// GENERATED FILE — do not edit by hand.
+const body = `// GENERATED FILE. Do not edit by hand.
 // Run \`npm run gallery:manifest\` after changing public/uploads/gallery.
 export const GALLERY_IMAGES: string[] = [
 ${ordered.map((f) => `  ${JSON.stringify(`/uploads/gallery/${f}`)},`).join("\n")}

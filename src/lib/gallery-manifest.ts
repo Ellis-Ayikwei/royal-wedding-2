@@ -1,4 +1,4 @@
-// GENERATED FILE — do not edit by hand.
+// GENERATED FILE. Do not edit by hand.
 // Run `npm run gallery:manifest` after changing public/uploads/gallery.
 export const GALLERY_IMAGES: string[] = [
   "/uploads/gallery/_MG_9204.webp",
