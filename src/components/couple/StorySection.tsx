@@ -4,7 +4,8 @@ import { motion } from "framer-motion";
 import { Eyebrow } from "../ui/primitives";
 
 const MILESTONES = [
-  { year: "2023", label: "A First Meeting in Accra" },
+  { year: "2022", label: "A First Meeting in Accra" },
+  { year: "2023", label: "Getting To know Each Other" },
   { year: "2024", label: "Building a Life Together" },
   { year: "2025", label: "A Proposal" },
   { year: "2026", label: "The Wedding" },
