@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import type { GalleryImage } from "@/lib/types";
 import { AdminButton, ConfirmDialog, EmptyState, Field, Input, Modal, Select, useToast } from "./AdminUI";
-import { ImageField } from "./ImageField";
+import { ImageUploader } from "./ImageUploader";
 
 const SECTIONS = ["hero", "couple", "story", "events", "gallery", "venue"];
 
@@ -94,7 +94,7 @@ function ImageForm({ onClose, onSave }: { onClose: () => void; onSave: (f: { url
   return (
     <Modal title="Add image" onClose={onClose}>
       <div className="space-y-4">
-        <ImageField label="Image" id="i-url" value={url} onChange={setUrl} />
+        <ImageUploader label="Image" id="i-url" value={url} onChange={setUrl} />
         <Field label="Caption" htmlFor="i-title">
           <Input id="i-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Optional" />
         </Field>

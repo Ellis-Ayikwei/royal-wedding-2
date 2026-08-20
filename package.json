@@ -10,14 +10,18 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1113.0",
+    "@aws-sdk/s3-request-presigner": "^3.1113.0",
     "@libsql/client": "^0.17.4",
     "bcryptjs": "^3.0.3",
     "exceljs": "^4.4.0",
     "framer-motion": "^13.1.0",
+    "heic-to": "^1.5.2",
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^1.31.0",
     "nanoid": "^6.0.1",
     "next": "16.3.0",
+    "qrcode": "^1.5.4",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "zod": "^4.4.3"
@@ -27,6 +31,7 @@
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",

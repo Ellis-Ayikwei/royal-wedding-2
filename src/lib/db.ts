@@ -142,7 +142,25 @@ async function migrate(db: Client) {
       adminId TEXT NOT NULL,
       expiresAt TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS event_photos (
+      id TEXT PRIMARY KEY,
+      url TEXT NOT NULL,
+      mediaType TEXT NOT NULL DEFAULT 'image',
+      uploaderName TEXT,
+      caption TEXT,
+      status TEXT NOT NULL DEFAULT 'visible',
+      createdAt TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_event_photos_status_created ON event_photos(status, createdAt);
   `);
+
+  try {
+    await db.execute("ALTER TABLE event_photos ADD COLUMN mediaType TEXT NOT NULL DEFAULT 'image'");
+  } catch {
+    // Existing databases already have the column.
+  }
 }
 
 async function seed(db: Client) {

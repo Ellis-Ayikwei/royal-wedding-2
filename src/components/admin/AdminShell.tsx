@@ -3,7 +3,7 @@
 import { ReactNode, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { LayoutDashboard, Users, CalendarDays, UtensilsCrossed, Images, Radio, MapPin, LogOut, Menu, X } from "lucide-react";
+import { LayoutDashboard, Users, CalendarDays, UtensilsCrossed, Images, Camera, Radio, MapPin, UserCog, LogOut, Menu, X } from "lucide-react";
 import { Monogram } from "../ui/Monogram";
 import { ToastProvider } from "./AdminUI";
 
@@ -13,8 +13,10 @@ const NAV = [
   { href: "/admin/events", label: "Event Lineup", icon: CalendarDays },
   { href: "/admin/menu", label: "Menu", icon: UtensilsCrossed },
   { href: "/admin/gallery", label: "Gallery", icon: Images },
+  { href: "/admin/photos", label: "Photo Wall", icon: Camera },
   { href: "/admin/streaming", label: "Live Stream", icon: Radio },
   { href: "/admin/venue", label: "Venue", icon: MapPin },
+  { href: "/admin/account", label: "Account", icon: UserCog },
 ];
 
 export function AdminShell({ children, adminEmail }: { children: ReactNode; adminEmail: string }) {

@@ -9,6 +9,7 @@ Navy, emerald and gold; British royal typography meets subtle African pattern wo
 - **TypeScript** (strict)
 - **Tailwind CSS v4** with a custom token system
 - **SQLite / Turso** via `@libsql/client` with a typed async repository layer (`src/lib/repo.ts`)
+- **Cloudflare R2** for image uploads (S3-compatible, presigned direct-to-bucket uploads), with a local-disk fallback for development
 - **Framer Motion** for scroll reveals, drawer and modal transitions
 - **bcrypt** password hashing + server-side session cookies
 
@@ -31,9 +32,12 @@ can't survive there:
   then set `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` in the Vercel project's
   environment variables. Without them the app fails fast with a message saying so,
   rather than trying to write to a read-only disk.
-- **Images** are plain URLs. Photos that ship with the site live in `public/uploads/`
-  and are committed, so Vercel serves them as static assets — no storage service and
-  no `BLOB_READ_WRITE_TOKEN` needed. Anything else can be any public image URL.
+- **Uploads → [Cloudflare R2](https://developers.cloudflare.com/r2/).** Browsers upload
+  straight to the bucket with a presigned URL, so nothing is written to the function's
+  filesystem. Without R2 credentials the app falls back to writing to local disk, which
+  works in development only.
+- **Photos that ship with the site** live in `public/uploads/` and are committed, so
+  Vercel serves them as ordinary static assets — no bucket involved.
 
 Neither variable is required locally — see `.env.example`. Without them the app runs
 against a local libSQL file at `data/wedding.db`.
@@ -82,16 +86,21 @@ httpOnly cookies with a 12-hour expiry.
 
 ## Images
 
-Every image field in the admin (gallery, events, venue) takes a URL, with a live
-preview beside it. File uploading was removed on purpose: it needed Vercel Blob in
-production and a writable disk locally, which is a lot of moving parts for a fixed
-set of wedding photos.
+Every image field in the admin (gallery, events, venue) has two modes: paste a link, or
+upload a file from the device. Uploads go direct to Cloudflare R2 via a presigned URL
+(`/api/admin/upload-url`), falling back to `POST /api/admin/upload` and local disk when
+R2 isn't configured. Either way the result is a URL in the same column, so nothing
+downstream cares which was used.
 
-The couple's photos live in `public/uploads/` and are committed to the repo, so they
-deploy as ordinary static assets and are referenced by path — `/uploads/hero.webp`,
+The couple's own photos live in `public/uploads/` and are committed to the repo, so they
+deploy as static assets and are referenced by path — `/uploads/hero.webp`,
 `/uploads/gallery/DSC_4912.webp`. `npm run gallery:manifest` regenerates
 `src/lib/gallery-manifest.ts` (which the database seed reads) after adding or removing
-files there. Any other public image URL works too.
+files there.
+
+**The public photo wall is hidden.** The guest-facing `/photos` experience and its nav
+link are switched off — see `src/app/photos/page.tsx`. The admin side (`/admin/photos`)
+still works, so submissions can be reviewed, and re-enabling is a small change.
 
 ## Notable behaviour
 

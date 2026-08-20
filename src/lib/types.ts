@@ -86,3 +86,15 @@ export interface SiteSettings {
   storyTitle: string | null;
   storyBody: string | null;
 }
+
+export type PhotoStatus = "visible" | "hidden";
+
+export interface EventPhoto {
+  id: string;
+  url: string;
+  mediaType: "image" | "video";
+  uploaderName: string | null;
+  caption: string | null;
+  status: PhotoStatus;
+  createdAt: string;
+}

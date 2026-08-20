@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { Venue } from "@/lib/types";
 import { AdminButton, Field, Input, Textarea, useToast } from "./AdminUI";
-import { ImageField } from "./ImageField";
+import { ImageUploader } from "./ImageUploader";
 
 export function VenueManager({ initialVenue }: { initialVenue: Venue }) {
   const { push } = useToast();
@@ -78,7 +78,7 @@ export function VenueManager({ initialVenue }: { initialVenue: Venue }) {
         <Field label="Custom Google Maps link" htmlFor="v-maps">
           <Input id="v-maps" value={form.mapsUrl} onChange={(e) => set("mapsUrl", e.target.value)} placeholder="Optional — overrides coordinates" />
         </Field>
-        <ImageField label="Venue image" id="v-img" value={form.image} onChange={(url) => set("image", url)} />
+        <ImageUploader label="Venue image" id="v-img" value={form.image} onChange={(url) => set("image", url)} />
 
         {error && <p className="text-xs text-rose-200">{error}</p>}
 
