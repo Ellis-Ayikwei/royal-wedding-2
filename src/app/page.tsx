@@ -5,6 +5,7 @@ import { Countdown } from "@/components/countdown/Countdown";
 import { StorySection } from "@/components/couple/StorySection";
 import { EventsTimeline } from "@/components/events/EventsTimeline";
 import { MenuSection } from "@/components/menu/MenuSection";
+import { GallerySection } from "@/components/gallery/GallerySection";
 import { VenueSection } from "@/components/venue/VenueSection";
 import { StreamingSection } from "@/components/streaming/StreamingSection";
 import { SiteFooter } from "@/components/footer/SiteFooter";
@@ -53,9 +54,7 @@ export default async function HomePage() {
         />
         <EventsTimeline events={events} />
         <MenuSection items={menuItems} settings={menuSettings} isVisible={isMenuVisible(menuSettings)} />
-        {/* Photo wall hidden — gallery images still supply the story portrait above.
-            Restore by rendering <GallerySection images={gallery} /> here and putting
-            the "Gallery" links back in SiteNav and SiteFooter. */}
+        <GallerySection images={gallery} />
         <VenueSection venue={venue} mapsUrl={buildMapsUrl(venue)} weddingDate={weddingDate} />
         <StreamingSection stream={stream} />
       </main>

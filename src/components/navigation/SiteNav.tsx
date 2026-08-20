@@ -10,6 +10,7 @@ const LINKS = [
   { href: "#story", label: "Our Story" },
   { href: "#events", label: "Events" },
   { href: "#menu", label: "Menu" },
+  { href: "#gallery", label: "Gallery" },
   { href: "#venue", label: "Location" },
   { href: "#live", label: "Live" },
 ];

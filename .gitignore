@@ -51,3 +51,5 @@ next-env.d.ts
 # Guest photo wall uploads only ever land on disk in local development (R2 not
 # configured); they're ephemeral test content, never meant to be committed.
 /public/event-photos/
+/CLAUDE.md
+CLAUDE.md
