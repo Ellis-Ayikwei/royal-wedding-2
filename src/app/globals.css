@@ -116,13 +116,14 @@ h1, h2, h3, h4, .font-display {
   transform: translateX(120%);
 }
 
-/* Soft leaf sprigs, echoing the foliage ground of the printed invitation. */
+/* Leaf sprigs echoing the foliage ground of the printed invitation. Solid colours
+   rather than alpha, so the ground reads as a printed card instead of a wash. */
 .pattern-leaf {
   background-image:
-    radial-gradient(ellipse 10px 4px at 20px 16px, rgba(143, 220, 187, 0.16) 45%, transparent 50%),
-    radial-gradient(ellipse 4px 10px at 52px 44px, rgba(143, 220, 187, 0.13) 45%, transparent 50%),
-    radial-gradient(ellipse 9px 4px at 84px 22px, rgba(143, 220, 187, 0.11) 45%, transparent 50%),
-    radial-gradient(ellipse 4px 9px at 16px 74px, rgba(143, 220, 187, 0.14) 45%, transparent 50%);
+    radial-gradient(ellipse 10px 4px at 20px 16px, var(--emerald-700) 45%, transparent 50%),
+    radial-gradient(ellipse 4px 10px at 52px 44px, var(--emerald-700) 45%, transparent 50%),
+    radial-gradient(ellipse 9px 4px at 84px 22px, var(--emerald-700) 45%, transparent 50%),
+    radial-gradient(ellipse 4px 9px at 16px 74px, var(--emerald-700) 45%, transparent 50%);
   background-size: 110px 100px;
 }
 

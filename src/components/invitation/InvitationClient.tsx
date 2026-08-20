@@ -1,10 +1,55 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Check, Users } from "lucide-react";
+
 import { RsvpProvider, useRsvp } from "../rsvp/RsvpProvider";
 import { PrimaryButton } from "../ui/primitives";
 import type { Guest } from "@/lib/types";
+
+/**
+ * The card is laid out once at this width and then scaled to fit the viewport, so the
+ * whole invitation is visible at any screen size without scrolling. Laying out at a
+ * phone width means small screens barely shrink it, while large screens scale it up.
+ */
+const CARD_WIDTH = 360;
+const MAX_SCALE = 1.9;
+
+function useFitToViewport() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(0);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const compute = () => {
+      const vw = window.visualViewport?.width ?? window.innerWidth;
+      const vh = window.visualViewport?.height ?? window.innerHeight;
+      // offsetWidth/Height are pre-transform, so this cannot feed back on itself.
+      const w = el.offsetWidth;
+      const h = el.offsetHeight;
+      if (!w || !h) return;
+      const margin = vw < 420 ? 16 : 40;
+      setScale(Math.min((vw - margin) / w, (vh - margin) / h, MAX_SCALE));
+    };
+
+    compute();
+    const observer = new ResizeObserver(compute);
+    observer.observe(el);
+    window.addEventListener("resize", compute);
+    window.visualViewport?.addEventListener("resize", compute);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", compute);
+      window.visualViewport?.removeEventListener("resize", compute);
+    };
+  }, []);
+
+  return { ref, scale };
+}
+
 
 /* Decorative gold lantern hanging from a chain, echoing the printed invitation. */
 function Lantern({ className = "", drop = 0 }: { className?: string; drop?: number }) {
@@ -22,19 +67,19 @@ function Lantern({ className = "", drop = 0 }: { className?: string; drop?: numb
         {/* crown */}
         <path d="M22 66h16l-3-6H25l-3 6Z" fill="url(#goldFill)" />
         {/* body */}
-        <path d="M18 70h24l4 10v26l-4 10H18l-4-10V80l4-10Z" fill="url(#goldFill)" opacity="0.95" />
+        <path d="M18 70h24l4 10v26l-4 10H18l-4-10V80l4-10Z" fill="url(#goldFill)" />
         <path d="M18 70h24l4 10v26l-4 10H18l-4-10V80l4-10Z" stroke="#f0dca8" strokeWidth="1" />
         {/* glass */}
-        <rect x="21" y="76" width="18" height="36" rx="2" fill="#ffeec4" opacity="0.55" />
-        <ellipse cx="30" cy="94" rx="6" ry="11" fill="#fff6dd" opacity="0.9" />
+        <rect x="21" y="76" width="18" height="36" rx="2" fill="#8a6f2e" />
+        <ellipse cx="30" cy="94" rx="6" ry="11" fill="#fff6dd" />
         {/* base */}
         <path d="M22 116h16l-2 7H24l-2-7Z" fill="url(#goldFill)" />
         <circle cx="30" cy="127" r="3" fill="#e6c983" />
       </g>
       <defs>
         <linearGradient id="goldLine" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#c9a24b" stopOpacity="0.2" />
-          <stop offset="100%" stopColor="#efdca0" stopOpacity="0.9" />
+          <stop offset="0%" stopColor="#8a6f2e" />
+          <stop offset="100%" stopColor="#efdca0" />
         </linearGradient>
         <linearGradient id="goldFill" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stopColor="#f2e0ac" />
@@ -68,7 +113,7 @@ function Bells({ className = "" }: { className?: string }) {
       </defs>
 
       {/* ribbon */}
-      <path d="M60 12c-14 6-22 12-26 20M60 12c14 6 22 12 26 20" stroke="#efdca0" strokeWidth="2" strokeLinecap="round" opacity="0.85" />
+      <path d="M60 12c-14 6-22 12-26 20M60 12c14 6 22 12 26 20" stroke="#efdca0" strokeWidth="2" strokeLinecap="round" />
       <path d="M60 12c-9-7-19-4-19 3 0 5 8 7 19 1Zm0 0c9-7 19-4 19 3 0 5-8 7-19 1Z" fill="url(#bellGold)" />
       <circle cx="60" cy="14" r="3.2" fill="#f6e7bb" />
 
@@ -98,13 +143,13 @@ function Heart({ className = "" }: { className?: string }) {
 function Divider() {
   return (
     <div className="flex items-center justify-center gap-3 my-7" aria-hidden="true">
-      <span className="h-px w-14 sm:w-20 bg-gradient-to-r from-transparent to-gold-300/80" />
-      <Heart className="h-3 w-3 text-gold-300/70" />
+      <span className="h-px w-14 bg-gold-400" />
+      <Heart className="h-3 w-3 text-gold-300" />
       <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 text-gold-300" fill="currentColor">
         <path d="M12 0c1 7 4 10 12 12-8 2-11 5-12 12-1-7-4-10-12-12C8 10 11 7 12 0Z" />
       </svg>
-      <Heart className="h-3 w-3 text-gold-300/70" />
-      <span className="h-px w-14 sm:w-20 bg-gradient-to-l from-transparent to-gold-300/80" />
+      <Heart className="h-3 w-3 text-gold-300" />
+      <span className="h-px w-14 bg-gold-400" />
     </div>
   );
 }
@@ -125,6 +170,7 @@ function InvitationInner({
   timeRange: string;
 }) {
   const { open, canRespond } = useRsvp();
+  const { ref, scale } = useFitToViewport();
 
   const date = weddingDate ? new Date(weddingDate) : null;
   const weekday = date?.toLocaleDateString("en-GB", { weekday: "long" }) ?? "";
@@ -135,129 +181,137 @@ function InvitationInner({
   const [first, second] = coupleNames.split("&").map((s) => s.trim());
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-emerald-800 px-4 py-10 sm:py-16">
+    <div className="fixed inset-0 overflow-hidden bg-emerald-800">
       {/* leafy ground */}
-      <div className="absolute inset-0 pattern-leaf opacity-[0.35]" aria-hidden="true" />
-      <div className="absolute inset-0 bg-gradient-to-b from-emerald-900/60 via-transparent to-emerald-900/70" aria-hidden="true" />
+      <div className="absolute inset-0 pattern-leaf" aria-hidden="true" />
 
-      <div className="relative mx-auto w-full max-w-2xl">
-        <div className="relative overflow-hidden rounded-md border border-gold-300/30 bg-emerald-800 shadow-[0_25px_80px_rgba(0,0,0,0.45)]">
-          <div className="absolute inset-0 pattern-leaf opacity-30" aria-hidden="true" />
-          <Arch className="absolute inset-x-0 top-0 h-full w-full text-emerald-900/45" />
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div
+          ref={ref}
+          style={{
+            width: CARD_WIDTH,
+            transform: `scale(${scale || 1})`,
+            opacity: scale ? 1 : 0,
+          }}
+          className="origin-center transition-opacity duration-300"
+        >
+          <div className="relative overflow-hidden rounded-md border-2 border-gold-400 bg-emerald-800">
+            <div className="absolute inset-0 pattern-leaf" aria-hidden="true" />
+            <Arch className="absolute inset-x-0 top-0 h-full w-full text-emerald-900" />
 
-          {/* lanterns */}
-          <Lantern className="absolute left-2 sm:left-6 top-0 h-40 sm:h-56 w-10 sm:w-14 opacity-95" drop={0} />
-          <Lantern className="absolute left-8 sm:left-20 top-0 h-52 sm:h-72 w-9 sm:w-12 opacity-80" drop={34} />
-          <Lantern className="absolute right-2 sm:right-6 top-0 h-40 sm:h-56 w-10 sm:w-14 opacity-95" drop={0} />
-          <Lantern className="absolute right-8 sm:right-20 top-0 h-52 sm:h-72 w-9 sm:w-12 opacity-80" drop={34} />
+            {/* lanterns */}
+            <Lantern className="absolute left-1 top-0 h-32 w-8" drop={0} />
+            <Lantern className="absolute left-7 top-0 h-40 w-7" drop={30} />
+            <Lantern className="absolute right-1 top-0 h-32 w-8" drop={0} />
+            <Lantern className="absolute right-7 top-0 h-40 w-7" drop={30} />
 
-          {/* scattered hearts */}
-          <Heart className="absolute left-[18%] top-[30%] h-3 w-3 text-gold-300/25" />
-          <Heart className="absolute right-[16%] top-[38%] h-4 w-4 text-gold-300/20" />
-          <Heart className="absolute left-[12%] bottom-[22%] h-3.5 w-3.5 text-gold-300/20" />
-          <Heart className="absolute right-[13%] bottom-[28%] h-3 w-3 text-gold-300/25" />
+            {/* scattered hearts */}
+            <Heart className="absolute left-[16%] top-[31%] h-2.5 w-2.5 text-emerald-700" />
+            <Heart className="absolute right-[14%] top-[39%] h-3 w-3 text-emerald-700" />
+            <Heart className="absolute left-[11%] bottom-[23%] h-3 w-3 text-emerald-700" />
+            <Heart className="absolute right-[12%] bottom-[29%] h-2.5 w-2.5 text-emerald-700" />
 
-          <div className="relative px-6 sm:px-14 pt-10 sm:pt-12 pb-12 text-center">
-            <Bells className="mx-auto h-16 w-20 sm:h-20 sm:w-24 drop-shadow-[0_3px_10px_rgba(0,0,0,0.3)]" />
+            <div className="relative px-5 pt-6 pb-7 text-center">
+              <Bells className="mx-auto h-12 w-16" />
 
-            <p className="mt-4 font-display text-ivory-100/85 text-sm sm:text-base">Join us to celebrate our</p>
+              <p className="mt-2.5 font-display text-ivory-100 text-[11px]">Join us to celebrate our</p>
 
-            <h1 className="font-script text-gold-200 leading-[0.9] text-5xl sm:text-7xl mt-1 sm:mt-2 drop-shadow-[0_2px_10px_rgba(0,0,0,0.25)]">
-              Wedding Ceremony
-            </h1>
+              <h1 className="font-script text-gold-200 leading-[0.95] text-[34px] mt-0.5">
+                Wedding Ceremony
+              </h1>
 
-            <p className="mt-8 sm:mt-10 font-display text-ivory-100/85 text-base sm:text-lg">
-              Honouring our Bride &amp; Groom
-            </p>
-            <p className="mt-1 font-display text-gold-200 tracking-[0.06em] text-3xl sm:text-5xl uppercase">
-              {first} <span className="text-gold-300/90">&amp;</span> {second}
-            </p>
-
-            <Divider />
-
-            {/* date block */}
-            <p className="font-display tracking-[0.42em] uppercase text-gold-200 text-sm sm:text-lg pl-[0.42em]">
-              {month}
-            </p>
-            <div className="mt-2 flex items-center justify-center gap-3 sm:gap-5">
-              <span className="hidden sm:block h-px flex-1 max-w-[120px] bg-gold-300/60" />
-              <span className="font-display tracking-[0.2em] uppercase text-ivory-100/85 text-xs sm:text-sm">
-                {weekday}
-              </span>
-              <span className="font-display text-gold-200 text-5xl sm:text-7xl leading-none">{day}</span>
-              <span className="font-display tracking-[0.2em] uppercase text-ivory-100/85 text-xs sm:text-sm">
-                {timeRange}
-              </span>
-              <span className="hidden sm:block h-px flex-1 max-w-[120px] bg-gold-300/60" />
-            </div>
-            <p className="mt-2 font-display text-gold-200 text-2xl sm:text-3xl">{year}</p>
-
-            <p className="mt-6 font-display italic text-ivory-100/70 text-sm">at</p>
-            <p className="mt-1 font-display font-semibold uppercase text-gold-200 text-base sm:text-xl leading-snug tracking-wide">
-              {venueName}
-              {venueAddress ? (
-                <>
-                  ,<br />
-                  {venueAddress}
-                </>
-              ) : null}
-            </p>
-
-            <p className="mt-6 font-display text-ivory-100/75 text-sm sm:text-base">
-              Traditional Ceremony &amp; White Wedding Ceremony
-            </p>
-            <p className="mt-1 font-display italic text-ivory-100/55 text-xs sm:text-sm">
-              Both ceremonies will take place on the same day.
-            </p>
-
-            {/* personal panel */}
-            <div className="mt-10 rounded-sm border border-gold-300/35 bg-emerald-900/50 px-6 py-6">
-              <p className="text-[10px] tracking-[0.3em] uppercase text-ivory-100/55">
-                This invitation is for
+              <p className="mt-4 font-display text-ivory-100 text-[12px]">
+                Honouring our Bride &amp; Groom
               </p>
-              <p className="mt-2 font-display text-2xl sm:text-3xl text-ivory-50">{guest.name}</p>
-              <p className="mt-2 inline-flex items-center gap-1.5 text-xs text-gold-200">
-                <Users size={13} />
-                {guest.guestCount > 1
-                  ? `Admitting ${guest.guestCount} guests`
-                  : "Admitting 1 guest"}
+              <p className="mt-0.5 font-display text-gold-200 tracking-[0.05em] text-[26px] leading-tight uppercase">
+                {first} <span className="text-gold-300">&amp;</span> {second}
               </p>
 
-              <div className="mt-6">
-                {canRespond ? (
-                  <PrimaryButton onClick={open}>Accept the Invitation</PrimaryButton>
-                ) : (
-                  <div className="rounded-sm border border-gold-300/30 bg-emerald-900/60 px-5 py-4">
-                    <p className="inline-flex items-center gap-2 text-sm text-gold-200">
-                      <Check size={16} />
-                      {guest.rsvpStatus === "accepted"
-                        ? guest.guestCount > 1
-                          ? `Your attendance is confirmed for ${guest.guestCount} guests.`
-                          : "Your attendance is confirmed."
-                        : "You have let us know you cannot attend."}
-                    </p>
-                    <p className="mt-2 text-[11px] text-ivory-100/45">
-                      To change your response, please contact the couple.
-                    </p>
-                  </div>
-                )}
+              <Divider />
+
+              {/* date block */}
+              <p className="font-display tracking-[0.4em] uppercase text-gold-200 text-[12px] pl-[0.4em]">
+                {month}
+              </p>
+              <div className="mt-1 flex items-center justify-center gap-2.5">
+                <span className="font-display tracking-[0.16em] uppercase text-ivory-100 text-[9px]">
+                  {weekday}
+                </span>
+                <span className="font-display text-gold-200 text-[42px] leading-none">{day}</span>
+                <span className="font-display tracking-[0.16em] uppercase text-ivory-100 text-[9px]">
+                  {timeRange}
+                </span>
               </div>
+              <p className="mt-0.5 font-display text-gold-200 text-[17px]">{year}</p>
+
+              <p className="mt-3 font-display italic text-ivory-100 text-[11px]">at</p>
+              <p className="mt-0.5 font-display font-semibold uppercase text-gold-200 text-[12px] leading-snug tracking-wide">
+                {venueName}
+                {venueAddress ? (
+                  <>
+                    ,<br />
+                    {venueAddress}
+                  </>
+                ) : null}
+              </p>
+
+              <p className="mt-3 font-display text-ivory-100 text-[11px] leading-snug">
+                Traditional Ceremony &amp; White Wedding Ceremony
+              </p>
+              <p className="mt-0.5 font-display italic text-gold-200 text-[10px]">
+                Both ceremonies will take place on the same day.
+              </p>
+
+              {/* personal panel */}
+              <div className="mt-4 rounded-sm border border-gold-400 bg-emerald-900 px-4 py-3.5">
+                <p className="text-[8px] tracking-[0.28em] uppercase text-gold-200">
+                  This invitation is for
+                </p>
+                <p className="mt-1 font-display text-[18px] leading-tight text-ivory-50">{guest.name}</p>
+                <p className="mt-1 inline-flex items-center gap-1.5 text-[10px] text-gold-200">
+                  <Users size={11} />
+                  {guest.guestCount > 1
+                    ? `Admitting ${guest.guestCount} guests`
+                    : "Admitting 1 guest"}
+                </p>
+
+                <div className="mt-3">
+                  {canRespond ? (
+                    <PrimaryButton className="px-5 py-2.5 text-[10px]" onClick={open}>
+                      Accept the Invitation
+                    </PrimaryButton>
+                  ) : (
+                    <div className="rounded-sm border border-gold-400 bg-emerald-900 px-3 py-2.5">
+                      <p className="inline-flex items-center gap-1.5 text-[11px] leading-snug text-gold-200">
+                        <Check size={13} />
+                        {guest.rsvpStatus === "accepted"
+                          ? guest.guestCount > 1
+                            ? `Your attendance is confirmed for ${guest.guestCount} guests.`
+                            : "Your attendance is confirmed."
+                          : "You have let us know you cannot attend."}
+                      </p>
+                      <p className="mt-1 text-[9px] text-gold-200">
+                        To change your response, please contact the couple.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <p className="mt-4 font-display italic text-ivory-100 text-[10px] leading-relaxed">
+                Above all these put on love, which binds everything together in perfect harmony.
+              </p>
+              <p className="mt-0.5 font-display italic text-gold-200 text-[9px]">Colossians 3:14</p>
+
+              <p className="mt-3 font-display italic text-ivory-100 text-[11px]">By invitation only.</p>
+
+              <Link
+                href="/#events"
+                className="inline-block mt-3 text-[9px] tracking-[0.22em] uppercase text-ivory-100 hover:text-gold-200 transition-colors"
+              >
+                View the full celebration
+              </Link>
             </div>
-
-            <p className="mt-8 font-display italic text-ivory-100/70 text-sm leading-relaxed">
-              Above all these put on love, which binds
-              <br className="hidden sm:block" /> everything together in perfect harmony.
-            </p>
-            <p className="mt-1 font-display italic text-gold-200/80 text-xs">Colossians 3:14</p>
-
-            <p className="mt-8 font-display italic text-ivory-100/60 text-sm">By invitation only.</p>
-
-            <Link
-              href="/#events"
-              className="inline-block mt-8 text-[11px] tracking-[0.25em] uppercase text-ivory-100/50 hover:text-gold-200 transition-colors"
-            >
-              View the full celebration
-            </Link>
           </div>
         </div>
       </div>
