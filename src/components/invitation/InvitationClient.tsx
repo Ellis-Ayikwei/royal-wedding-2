@@ -1,55 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Check, Users } from "lucide-react";
 
 import { RsvpProvider, useRsvp } from "../rsvp/RsvpProvider";
 import { PrimaryButton } from "../ui/primitives";
 import type { Guest } from "@/lib/types";
-
-/**
- * The card is laid out once at this width and then scaled to fit the viewport, so the
- * whole invitation is visible at any screen size without scrolling. Laying out at a
- * phone width means small screens barely shrink it, while large screens scale it up.
- */
-const CARD_WIDTH = 360;
-const MAX_SCALE = 1.9;
-
-function useFitToViewport() {
-  const ref = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(0);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const compute = () => {
-      const vw = window.visualViewport?.width ?? window.innerWidth;
-      const vh = window.visualViewport?.height ?? window.innerHeight;
-      // offsetWidth/Height are pre-transform, so this cannot feed back on itself.
-      const w = el.offsetWidth;
-      const h = el.offsetHeight;
-      if (!w || !h) return;
-      const margin = vw < 420 ? 16 : 40;
-      setScale(Math.min((vw - margin) / w, (vh - margin) / h, MAX_SCALE));
-    };
-
-    compute();
-    const observer = new ResizeObserver(compute);
-    observer.observe(el);
-    window.addEventListener("resize", compute);
-    window.visualViewport?.addEventListener("resize", compute);
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("resize", compute);
-      window.visualViewport?.removeEventListener("resize", compute);
-    };
-  }, []);
-
-  return { ref, scale };
-}
-
 
 /* Decorative gold lantern hanging from a chain, echoing the printed invitation. */
 function Lantern({ className = "", drop = 0 }: { className?: string; drop?: number }) {
@@ -170,7 +126,6 @@ function InvitationInner({
   timeRange: string;
 }) {
   const { open, canRespond } = useRsvp();
-  const { ref, scale } = useFitToViewport();
 
   const date = weddingDate ? new Date(weddingDate) : null;
   const weekday = date?.toLocaleDateString("en-GB", { weekday: "long" }) ?? "";
@@ -181,71 +136,63 @@ function InvitationInner({
   const [first, second] = coupleNames.split("&").map((s) => s.trim());
 
   return (
-    <div className="fixed inset-0 overflow-hidden bg-emerald-800">
+    <div className="relative min-h-screen bg-emerald-800 px-4 py-10 sm:py-16">
       {/* leafy ground */}
       <div className="absolute inset-0 pattern-leaf" aria-hidden="true" />
 
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div
-          ref={ref}
-          style={{
-            width: CARD_WIDTH,
-            transform: `scale(${scale || 1})`,
-            opacity: scale ? 1 : 0,
-          }}
-          className="origin-center transition-opacity duration-300"
-        >
+      <div className="relative mx-auto w-full max-w-2xl">
+        <div>
           <div className="relative overflow-hidden rounded-md border-2 border-gold-400 bg-emerald-800">
             <div className="absolute inset-0 pattern-leaf" aria-hidden="true" />
             <Arch className="absolute inset-x-0 top-0 h-full w-full text-emerald-900" />
 
             {/* lanterns */}
-            <Lantern className="absolute left-1 top-0 h-32 w-8" drop={0} />
-            <Lantern className="absolute left-7 top-0 h-40 w-7" drop={30} />
-            <Lantern className="absolute right-1 top-0 h-32 w-8" drop={0} />
-            <Lantern className="absolute right-7 top-0 h-40 w-7" drop={30} />
+            <Lantern className="absolute left-2 sm:left-6 top-0 h-40 sm:h-56 w-10 sm:w-14" drop={0} />
+            <Lantern className="absolute left-8 sm:left-20 top-0 h-52 sm:h-72 w-9 sm:w-12" drop={34} />
+            <Lantern className="absolute right-2 sm:right-6 top-0 h-40 sm:h-56 w-10 sm:w-14" drop={0} />
+            <Lantern className="absolute right-8 sm:right-20 top-0 h-52 sm:h-72 w-9 sm:w-12" drop={34} />
 
             {/* scattered hearts */}
-            <Heart className="absolute left-[16%] top-[31%] h-2.5 w-2.5 text-emerald-700" />
-            <Heart className="absolute right-[14%] top-[39%] h-3 w-3 text-emerald-700" />
-            <Heart className="absolute left-[11%] bottom-[23%] h-3 w-3 text-emerald-700" />
-            <Heart className="absolute right-[12%] bottom-[29%] h-2.5 w-2.5 text-emerald-700" />
+            <Heart className="absolute left-[18%] top-[30%] h-3 w-3 text-emerald-700" />
+            <Heart className="absolute right-[16%] top-[38%] h-4 w-4 text-emerald-700" />
+            <Heart className="absolute left-[12%] bottom-[22%] h-3.5 w-3.5 text-emerald-700" />
+            <Heart className="absolute right-[13%] bottom-[28%] h-3 w-3 text-emerald-700" />
 
-            <div className="relative px-5 pt-6 pb-7 text-center">
-              <Bells className="mx-auto h-12 w-16" />
+            <div className="relative px-6 sm:px-14 pt-10 sm:pt-12 pb-12 text-center">
+              <Bells className="mx-auto h-16 w-20 sm:h-20 sm:w-24" />
 
-              <p className="mt-2.5 font-display text-ivory-100 text-[11px]">Join us to celebrate our</p>
+              <p className="mt-4 font-display text-ivory-100 text-sm sm:text-base">Join us to celebrate our</p>
 
-              <h1 className="font-script text-gold-200 leading-[0.95] text-[34px] mt-0.5">
+              <h1 className="font-script text-gold-200 leading-[0.9] text-5xl sm:text-7xl mt-1 sm:mt-2">
                 Wedding Ceremony
               </h1>
 
-              <p className="mt-4 font-display text-ivory-100 text-[12px]">
+              <p className="mt-8 sm:mt-10 font-display text-ivory-100 text-base sm:text-lg">
                 Honouring our Bride &amp; Groom
               </p>
-              <p className="mt-0.5 font-display text-gold-200 tracking-[0.05em] text-[26px] leading-tight uppercase">
+              <p className="mt-1 font-display text-gold-200 tracking-[0.06em] text-3xl sm:text-5xl uppercase">
                 {first} <span className="text-gold-300">&amp;</span> {second}
               </p>
 
               <Divider />
 
               {/* date block */}
-              <p className="font-display tracking-[0.4em] uppercase text-gold-200 text-[12px] pl-[0.4em]">
+              <p className="font-display tracking-[0.42em] uppercase text-gold-200 text-sm sm:text-lg pl-[0.42em]">
                 {month}
               </p>
-              <div className="mt-1 flex items-center justify-center gap-2.5">
-                <span className="font-display tracking-[0.16em] uppercase text-ivory-100 text-[9px]">
+              <div className="mt-2 flex items-center justify-center gap-3 sm:gap-5">
+                <span className="font-display tracking-[0.2em] uppercase text-ivory-100 text-xs sm:text-sm">
                   {weekday}
                 </span>
-                <span className="font-display text-gold-200 text-[42px] leading-none">{day}</span>
+                <span className="font-display text-gold-200 text-5xl sm:text-7xl leading-none">{day}</span>
                 <span className="font-display tracking-[0.16em] uppercase text-ivory-100 text-[9px]">
                   {timeRange}
                 </span>
               </div>
-              <p className="mt-0.5 font-display text-gold-200 text-[17px]">{year}</p>
+              <p className="mt-2 font-display text-gold-200 text-2xl sm:text-3xl">{year}</p>
 
-              <p className="mt-3 font-display italic text-ivory-100 text-[11px]">at</p>
-              <p className="mt-0.5 font-display font-semibold uppercase text-gold-200 text-[12px] leading-snug tracking-wide">
+              <p className="mt-6 font-display italic text-ivory-100 text-sm">at</p>
+              <p className="mt-1 font-display font-semibold uppercase text-gold-200 text-base sm:text-xl leading-snug tracking-wide">
                 {venueName}
                 {venueAddress ? (
                   <>
@@ -255,42 +202,42 @@ function InvitationInner({
                 ) : null}
               </p>
 
-              <p className="mt-3 font-display text-ivory-100 text-[11px] leading-snug">
+              <p className="mt-6 font-display text-ivory-100 text-sm sm:text-base">
                 Traditional Ceremony &amp; White Wedding Ceremony
               </p>
-              <p className="mt-0.5 font-display italic text-gold-200 text-[10px]">
+              <p className="mt-1 font-display italic text-gold-200 text-xs sm:text-sm">
                 Both ceremonies will take place on the same day.
               </p>
 
               {/* personal panel */}
-              <div className="mt-4 rounded-sm border border-gold-400 bg-emerald-900 px-4 py-3.5">
-                <p className="text-[8px] tracking-[0.28em] uppercase text-gold-200">
+              <div className="mt-10 rounded-sm border border-gold-400 bg-emerald-900 px-6 py-6">
+                <p className="text-[10px] tracking-[0.3em] uppercase text-gold-200">
                   This invitation is for
                 </p>
-                <p className="mt-1 font-display text-[18px] leading-tight text-ivory-50">{guest.name}</p>
-                <p className="mt-1 inline-flex items-center gap-1.5 text-[10px] text-gold-200">
-                  <Users size={11} />
+                <p className="mt-2 font-display text-2xl sm:text-3xl text-ivory-50">{guest.name}</p>
+                <p className="mt-2 inline-flex items-center gap-1.5 text-xs text-gold-200">
+                  <Users size={13} />
                   {guest.guestCount > 1
                     ? `Admitting ${guest.guestCount} guests`
                     : "Admitting 1 guest"}
                 </p>
 
-                <div className="mt-3">
+                <div className="mt-6">
                   {canRespond ? (
-                    <PrimaryButton className="px-5 py-2.5 text-[10px]" onClick={open}>
+                    <PrimaryButton onClick={open}>
                       Accept the Invitation
                     </PrimaryButton>
                   ) : (
-                    <div className="rounded-sm border border-gold-400 bg-emerald-900 px-3 py-2.5">
-                      <p className="inline-flex items-center gap-1.5 text-[11px] leading-snug text-gold-200">
-                        <Check size={13} />
+                    <div className="rounded-sm border border-gold-400 bg-emerald-900 px-5 py-4">
+                      <p className="inline-flex items-center gap-2 text-sm text-gold-200">
+                        <Check size={16} />
                         {guest.rsvpStatus === "accepted"
                           ? guest.guestCount > 1
                             ? `Your attendance is confirmed for ${guest.guestCount} guests.`
                             : "Your attendance is confirmed."
                           : "You have let us know you cannot attend."}
                       </p>
-                      <p className="mt-1 text-[9px] text-gold-200">
+                      <p className="mt-2 text-[11px] text-gold-200">
                         To change your response, please contact the couple.
                       </p>
                     </div>
@@ -298,16 +245,16 @@ function InvitationInner({
                 </div>
               </div>
 
-              <p className="mt-4 font-display italic text-ivory-100 text-[10px] leading-relaxed">
+              <p className="mt-8 font-display italic text-ivory-100 text-sm leading-relaxed">
                 Above all these put on love, which binds everything together in perfect harmony.
               </p>
-              <p className="mt-0.5 font-display italic text-gold-200 text-[9px]">Colossians 3:14</p>
+              <p className="mt-1 font-display italic text-gold-200 text-xs">Colossians 3:14</p>
 
-              <p className="mt-3 font-display italic text-ivory-100 text-[11px]">By invitation only.</p>
+              <p className="mt-8 font-display italic text-ivory-100 text-sm">By invitation only.</p>
 
               <Link
                 href="/#events"
-                className="inline-block mt-3 text-[9px] tracking-[0.22em] uppercase text-ivory-100 hover:text-gold-200 transition-colors"
+                className="inline-block mt-8 text-[11px] tracking-[0.25em] uppercase text-ivory-100 hover:text-gold-200 transition-colors"
               >
                 View the full celebration
               </Link>

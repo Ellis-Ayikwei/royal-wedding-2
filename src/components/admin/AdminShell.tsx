@@ -3,12 +3,13 @@
 import { ReactNode, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { LayoutDashboard, Users, CalendarDays, UtensilsCrossed, Images, Camera, Radio, MapPin, UserCog, LogOut, Menu, X } from "lucide-react";
+import { LayoutDashboard, Users, CalendarDays, UtensilsCrossed, Images, Camera, Radio, MapPin, UserCog, Sparkles, LogOut, Menu, X } from "lucide-react";
 import { Monogram } from "../ui/Monogram";
 import { ToastProvider } from "./AdminUI";
 
 const NAV = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/settings", label: "Site Details", icon: Sparkles },
   { href: "/admin/guests", label: "Guests", icon: Users },
   { href: "/admin/events", label: "Event Lineup", icon: CalendarDays },
   { href: "/admin/menu", label: "Menu", icon: UtensilsCrossed },

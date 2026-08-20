@@ -25,6 +25,26 @@ export async function getSiteSettings(): Promise<SiteSettings> {
   return res.rows[0] as unknown as SiteSettings;
 }
 
+export async function updateSiteSettings(
+  input: Partial<Omit<SiteSettings, "id">>
+): Promise<SiteSettings> {
+  const existing = await getSiteSettings();
+  const merged = { ...existing, ...input };
+  const db = await getDb();
+  await db.execute({
+    sql: `UPDATE site_settings SET coupleNames=?, weddingDate=?, heroImage=?, heroTagline=?, storyTitle=?, storyBody=? WHERE id=1`,
+    args: [
+      merged.coupleNames,
+      merged.weddingDate,
+      merged.heroImage,
+      merged.heroTagline,
+      merged.storyTitle,
+      merged.storyBody,
+    ],
+  });
+  return getSiteSettings();
+}
+
 // ---------- Guests ----------
 export async function listGuests(): Promise<Guest[]> {
   const db = await getDb();
