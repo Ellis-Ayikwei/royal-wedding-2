@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Plus, Copy, RefreshCw, Pencil, Trash2, Search, FileSpreadsheet, Loader2 } from "lucide-react";
+import { Plus, Copy, RefreshCw, RotateCw, Pencil, Trash2, Search, FileSpreadsheet, Loader2 } from "lucide-react";
 import type { Guest, RsvpStatus } from "@/lib/types";
 import { AdminButton, ConfirmDialog, EmptyState, Field, Input, Modal, Select, useToast } from "./AdminUI";
 
@@ -24,6 +24,14 @@ export function GuestsManager({ initialGuests }: { initialGuests: Guest[] }) {
   const [deleting, setDeleting] = useState<Guest | null>(null);
   const [busy, setBusy] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  async function refreshList() {
+    setRefreshing(true);
+    const ok = await reloadGuests();
+    push(ok ? "Guest list refreshed" : "Could not refresh the guest list.", ok ? "success" : "error");
+    setRefreshing(false);
+  }
 
   async function exportToExcel() {
     setExporting(true);
@@ -71,6 +79,20 @@ export function GuestsManager({ initialGuests }: { initialGuests: Guest[] }) {
     }
   }
 
+  // Pull the list back from the server so what is on screen matches what was stored,
+  // including the fields the server fills in such as the invitation token.
+  async function reloadGuests() {
+    try {
+      const res = await fetch("/api/admin/guests", { cache: "no-store" });
+      if (!res.ok) return false;
+      const data = await res.json();
+      setGuests(data.guests as Guest[]);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   async function saveGuest(form: GuestFormValues, existing: Guest | null) {
     setBusy(true);
     try {
@@ -84,10 +106,20 @@ export function GuestsManager({ initialGuests }: { initialGuests: Guest[] }) {
         push(data.error || "Could not save the guest.", "error");
         return;
       }
+
+      // Show the guest straight away even if the current search or status filter
+      // would have hidden them.
+      if (!existing) {
+        setQuery("");
+        setFilter("all");
+      }
+
       setGuests((gs) => (existing ? gs.map((g) => (g.id === data.guest.id ? data.guest : g)) : [data.guest, ...gs]));
-      push(existing ? "Guest updated" : "Guest added");
       setEditing(null);
       setCreating(false);
+      push(existing ? "Guest updated" : `${data.guest.name} added to the guest list`);
+
+      await reloadGuests();
     } catch {
       push("Could not reach the server.", "error");
     } finally {
@@ -120,6 +152,10 @@ export function GuestsManager({ initialGuests }: { initialGuests: Guest[] }) {
           <p className="mt-1.5 text-sm text-ivory-100/50">{guests.length} on the guest list</p>
         </div>
         <div className="flex items-center gap-3">
+          <AdminButton variant="ghost" onClick={refreshList} disabled={refreshing}>
+            <RotateCw size={14} className={refreshing ? "animate-spin" : ""} />
+            {refreshing ? "Refreshing" : "Refresh"}
+          </AdminButton>
           <AdminButton variant="ghost" onClick={exportToExcel} disabled={exporting || guests.length === 0}>
             {exporting ? <Loader2 size={14} className="animate-spin" /> : <FileSpreadsheet size={14} />}
             {exporting ? "Exporting" : "Export to Excel"}

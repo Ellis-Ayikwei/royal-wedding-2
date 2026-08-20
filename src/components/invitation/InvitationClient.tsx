@@ -46,14 +46,51 @@ function Lantern({ className = "", drop = 0 }: { className?: string; drop?: numb
   );
 }
 
-/* The ogee arch the printed card sets its type inside. */
+/* A soft rounded garden arch for the type to sit inside. */
 function Arch({ className = "" }: { className?: string }) {
   return (
     <svg viewBox="0 0 400 560" className={className} fill="none" aria-hidden="true" preserveAspectRatio="none">
-      <path
-        d="M200 8c0 46-70 62-70 118 0 34 26 54 26 54H44v372h312V180h-112s26-20 26-54c0-56-70-72-70-118Z"
-        fill="currentColor"
-      />
+      <path d="M44 560V200a156 156 0 0 1 312 0v360Z" fill="currentColor" />
+    </svg>
+  );
+}
+
+/* Pair of wedding bells with a ribbon bow, hung from the top of the card. */
+function Bells({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 120 96" className={className} fill="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="bellGold" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#f2e0ac" />
+          <stop offset="55%" stopColor="#d9b869" />
+          <stop offset="100%" stopColor="#b08c3c" />
+        </linearGradient>
+      </defs>
+
+      {/* ribbon */}
+      <path d="M60 12c-14 6-22 12-26 20M60 12c14 6 22 12 26 20" stroke="#efdca0" strokeWidth="2" strokeLinecap="round" opacity="0.85" />
+      <path d="M60 12c-9-7-19-4-19 3 0 5 8 7 19 1Zm0 0c9-7 19-4 19 3 0 5-8 7-19 1Z" fill="url(#bellGold)" />
+      <circle cx="60" cy="14" r="3.2" fill="#f6e7bb" />
+
+      {/* left bell */}
+      <g transform="rotate(-12 38 34)">
+        <path d="M38 30c-11 0-17 9-18 20-1 8-3 12-6 15h48c-3-3-5-7-6-15-1-11-7-20-18-20Z" fill="url(#bellGold)" stroke="#f0dca8" strokeWidth="1" />
+        <circle cx="38" cy="72" r="4.5" fill="#e6c983" />
+      </g>
+
+      {/* right bell */}
+      <g transform="rotate(12 82 34)">
+        <path d="M82 30c-11 0-17 9-18 20-1 8-3 12-6 15h48c-3-3-5-7-6-15-1-11-7-20-18-20Z" fill="url(#bellGold)" stroke="#f0dca8" strokeWidth="1" />
+        <circle cx="82" cy="72" r="4.5" fill="#e6c983" />
+      </g>
+    </svg>
+  );
+}
+
+function Heart({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="currentColor" aria-hidden="true">
+      <path d="M12 21s-8.4-5.2-10.2-10A5.4 5.4 0 0 1 12 6.6 5.4 5.4 0 0 1 22.2 11C20.4 15.8 12 21 12 21Z" />
     </svg>
   );
 }
@@ -61,11 +98,13 @@ function Arch({ className = "" }: { className?: string }) {
 function Divider() {
   return (
     <div className="flex items-center justify-center gap-3 my-7" aria-hidden="true">
-      <span className="h-px w-16 sm:w-24 bg-gradient-to-r from-transparent to-gold-300/80" />
+      <span className="h-px w-14 sm:w-20 bg-gradient-to-r from-transparent to-gold-300/80" />
+      <Heart className="h-3 w-3 text-gold-300/70" />
       <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 text-gold-300" fill="currentColor">
         <path d="M12 0c1 7 4 10 12 12-8 2-11 5-12 12-1-7-4-10-12-12C8 10 11 7 12 0Z" />
       </svg>
-      <span className="h-px w-16 sm:w-24 bg-gradient-to-l from-transparent to-gold-300/80" />
+      <Heart className="h-3 w-3 text-gold-300/70" />
+      <span className="h-px w-14 sm:w-20 bg-gradient-to-l from-transparent to-gold-300/80" />
     </div>
   );
 }
@@ -112,8 +151,16 @@ function InvitationInner({
           <Lantern className="absolute right-2 sm:right-6 top-0 h-40 sm:h-56 w-10 sm:w-14 opacity-95" drop={0} />
           <Lantern className="absolute right-8 sm:right-20 top-0 h-52 sm:h-72 w-9 sm:w-12 opacity-80" drop={34} />
 
-          <div className="relative px-6 sm:px-14 pt-16 sm:pt-20 pb-12 text-center">
-            <p className="font-display text-ivory-100/85 text-sm sm:text-base">Join us to celebrate our</p>
+          {/* scattered hearts */}
+          <Heart className="absolute left-[18%] top-[30%] h-3 w-3 text-gold-300/25" />
+          <Heart className="absolute right-[16%] top-[38%] h-4 w-4 text-gold-300/20" />
+          <Heart className="absolute left-[12%] bottom-[22%] h-3.5 w-3.5 text-gold-300/20" />
+          <Heart className="absolute right-[13%] bottom-[28%] h-3 w-3 text-gold-300/25" />
+
+          <div className="relative px-6 sm:px-14 pt-10 sm:pt-12 pb-12 text-center">
+            <Bells className="mx-auto h-16 w-20 sm:h-20 sm:w-24 drop-shadow-[0_3px_10px_rgba(0,0,0,0.3)]" />
+
+            <p className="mt-4 font-display text-ivory-100/85 text-sm sm:text-base">Join us to celebrate our</p>
 
             <h1 className="font-script text-gold-200 leading-[0.9] text-5xl sm:text-7xl mt-1 sm:mt-2 drop-shadow-[0_2px_10px_rgba(0,0,0,0.25)]">
               Wedding Ceremony

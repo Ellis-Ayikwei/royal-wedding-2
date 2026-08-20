@@ -1,10 +1,14 @@
 "use client";
 
 import { useEffect, useState, FormEvent } from "react";
+import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { X, Check, Loader2, AlertCircle, Users } from "lucide-react";
 import { PrimaryButton, GhostButton } from "../ui/primitives";
 import type { Invitation } from "./RsvpProvider";
+
+/** How long the confirmation stays on screen before the guest is taken to the site. */
+const REDIRECT_DELAY_MS = 4000;
 
 type Attendance = "accepted" | "declined";
 type Status = "idle" | "loading" | "success" | "error";
@@ -21,6 +25,7 @@ export function RsvpModal({
   const [message, setMessage] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -33,6 +38,14 @@ export function RsvpModal({
       document.body.style.overflow = "";
     };
   }, [onClose]);
+
+  // The invitation page was rendered before this response existed, so sending the guest
+  // back to it would show the Accept button again. Take them to the wedding site instead.
+  useEffect(() => {
+    if (status !== "success") return;
+    const timer = setTimeout(() => router.push("/"), REDIRECT_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [status, router]);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -124,9 +137,12 @@ export function RsvpModal({
                       }.`
                     : "We will miss you, and we're grateful you took a moment to respond."}
                 </p>
-                <GhostButton className="mt-8" onClick={onClose}>
-                  Close
+                <GhostButton className="mt-8" onClick={() => router.push("/")}>
+                  Continue to the wedding site
                 </GhostButton>
+                <p className="mt-3 text-[11px] text-ivory-100/40">
+                  Taking you there in a moment.
+                </p>
               </div>
             ) : (
               <>
