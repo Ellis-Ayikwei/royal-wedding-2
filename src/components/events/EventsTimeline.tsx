@@ -63,7 +63,9 @@ export function EventsTimeline({ events }: { events: WeddingEvent[] }) {
                       </span>
                     )}
                     <h3 className="font-display text-xl sm:text-2xl text-ivory-50">{event.title}</h3>
-                    <p className="mt-2 text-sm text-ivory-100/60 leading-relaxed">{event.description}</p>
+                    <p className="mt-2 text-sm text-ivory-100/60 leading-relaxed whitespace-pre-line">
+                      {event.description}
+                    </p>
                     <div
                       className={`mt-4 flex flex-col gap-1.5 text-xs text-gold-200/80 ${
                         i % 2 === 1 ? "sm:items-end" : ""
